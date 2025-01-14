@@ -1,11 +1,10 @@
-import Quantumlib.Data.Basic
+import Quantumlib.Data.Basis.Basic
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.KroneckerCMatrix
 
 import Lean
 
 open Matrix KroneckerCMatrix
-
 
 open Lean PrettyPrinter Delaborator
 
@@ -93,4 +92,12 @@ example : ⟨10∣ = !![0, 0, 1, 0] := by
   fin_cases j
     <;> simp [vecCons, Fin.divNat, Fin.modNat]
     <;> rfl
+
+notation "∣+⟩" => xbasisPlus
+notation "∣-⟩" => xbasisMinus
+
+notation "∣R⟩" => ybasisPlus
+notation "∣L⟩" => ybasisMinus
+
+notation "∣Φ+⟩" => EPRpair
 

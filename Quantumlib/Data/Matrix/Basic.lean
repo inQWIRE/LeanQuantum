@@ -8,5 +8,4 @@ abbrev CMatrix m n := Matrix (Fin m) (Fin n) ℂ
 abbrev CVector n := CMatrix n 1
 abbrev CSquare n := CMatrix n n
 
-abbrev Matrix.IsUnitary {n} (M : CSquare n) := M ∈ Matrix.unitaryGroup (Fin n) ℂ
 
