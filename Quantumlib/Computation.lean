@@ -1,4 +1,5 @@
 import Quantumlib.Data.Basic
+import Quantumlib.Tactic.Basic
 
 open Matrix KroneckerCMatrix
 

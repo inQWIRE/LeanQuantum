@@ -5,7 +5,7 @@ import Quantumlib.Data.Matrix.Unitary
 import Mathlib.LinearAlgebra.UnitaryGroup
 
 open Complex in
-lemma rotation_unitary : ∀ θ φ δ, (rotation θ φ δ).IsUnitary := by
+lemma rotation_isUnitary : ∀ θ φ δ, (rotation θ φ δ).IsUnitary := by
   intros θ φ δ
   simp_rw [Matrix.mem_unitaryGroup_iff', star, rotation_conjTranspose]
   simp only [rotation]
@@ -39,34 +39,34 @@ lemma rotation_unitary : ∀ θ φ δ, (rotation θ φ δ).IsUnitary := by
         repeat rw [←exp_add]; ring_nf
       _ = _ := by simp
 
-lemma hadamard_unitary : hadamard.IsUnitary := by 
+lemma hadamard_isUnitary : hadamard.IsUnitary := by 
   rw [←rotation_hadamard]
-  apply rotation_unitary
+  apply rotation_isUnitary
 
-lemma σx_unitary : σx.IsUnitary := by
+lemma σx_isUnitary : σx.IsUnitary := by
   rw [←rotation_σx]
-  apply rotation_unitary
+  apply rotation_isUnitary
 
-lemma σy_unitary : σy.IsUnitary := by
+lemma σy_isUnitary : σy.IsUnitary := by
   rw [←rotation_σy]
-  apply rotation_unitary
+  apply rotation_isUnitary
 
-lemma σz_unitary : σz.IsUnitary := by
+lemma σz_isUnitary : σz.IsUnitary := by
   rw [←rotation_σz]
-  apply rotation_unitary
+  apply rotation_isUnitary
 
-lemma phase_unitary : ∀ φ, (phaseShift φ).IsUnitary := by
+lemma phase_isUnitary : ∀ φ, (phaseShift φ).IsUnitary := by
   intros φ
   rw [←rotation_phaseShift φ]
-  apply rotation_unitary
+  apply rotation_isUnitary
 
-lemma sGate_unitary : sGate.IsUnitary := by 
-  apply phase_unitary
+lemma sGate_isUnitary : sGate.IsUnitary := by 
+  apply phase_isUnitary
 
-lemma tGate_unitary : tGate.IsUnitary := by 
-  apply phase_unitary
+lemma tGate_isUnitary : tGate.IsUnitary := by 
+  apply phase_isUnitary
 
-lemma control_unitary : ∀ (M : CSquare n),
+lemma controlM_isUnitary : ∀ (M : CSquare n),
   M.IsUnitary → (controlM M).IsUnitary := by
     intros M h
     simp_rw [Matrix.mem_unitaryGroup_iff', star] at h ⊢
@@ -75,5 +75,4 @@ lemma control_unitary : ∀ (M : CSquare n),
     unfold controlM
     admit
 
-
-
+lemma 

@@ -2,10 +2,12 @@ import Quantumlib.Data.Basis.Notation
 import Quantumlib.Data.Basis.Equivs
 import Quantumlib.Data.Gate.Basic
 import Quantumlib.Data.Gate.Pauli
+import Quantumlib.Data.Gate.PhaseShift
 import Quantumlib.Data.Gate.Rotation
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Tactic.Basic
 
 open Matrix KroneckerCMatrix
 
@@ -102,8 +104,7 @@ lemma rotation_phaseShift : ∀ θ,
 
 lemma rotation_1 : rotation 0 0 0 = 1 := by
   simp [rotation]
-  ext i j
-  fin_cases i <;> fin_cases j <;> rfl
+  solve_matrix
 
 @[simp]
 lemma rotation_conjTranspose : ∀ θ φ δ, (rotation θ φ δ)ᴴ = rotation (-θ) (-δ) (-φ) := by
@@ -120,22 +121,66 @@ lemma rotation_conjTranspose : ∀ θ φ δ, (rotation θ φ δ)ᴴ = rotation (
   all_goals ring_nf
 
 @[simp]
-lemma σx_mul_σx : σx * σx = 1 := by
-  simp only [σx]
+lemma phaseShift_0 : phaseShift 0 = 1 := by
+  simp [phaseShift]
+  solve_matrix
+
+@[simp]
+lemma phaseShift_π : phaseShift π = σz := by
+  simp [phaseShift, σz]
+
+@[simp]
+lemma phaseShift_2π : phaseShift (2 * π) = 1 := by
+  simp [phaseShift]
+  solve_matrix
+
+@[simp]
+lemma phaseShift_neg_pi : phaseShift (-π) = σz := by
+  simp [phaseShift, σz]
   ext i j
   fin_cases i <;> fin_cases j <;> simp
+  rw [Complex.exp_neg]
+  field_simp
+
+@[simp]
+lemma phaseShift_mul : ∀ θ₁ θ₂, phaseShift θ₁ * phaseShift θ₂ = phaseShift (θ₁ + θ₂) := by
+  intros θ₁ θ₂
+  simp [phaseShift]
+  rw [←Complex.exp_add, add_mul]
+
+@[simp]
+lemma phaseShift_pow : ∀ (n : ℕ) θ, (phaseShift θ) ^ n  = phaseShift (n * θ) := by
+  intros n θ
+  induction n
+  case zero => simp
+  case succ n' ih => 
+    simp [pow_succ]
+    rw [add_mul, ←phaseShift_mul, ih]
+    ring_nf
+
+@[simp]
+lemma sGate_mul_sGate : sGate * sGate = σz := by
+  simp [sGate]
+
+@[simp]
+lemma tGate_mul_tGate : tGate * tGate = sGate := by
+  simp [tGate, sGate]
+  ring_nf
+
+@[simp]
+lemma σx_mul_σx : σx * σx = 1 := by
+  simp only [σx]
+  solve_matrix
 
 @[simp]
 lemma σy_mul_σy : σy * σy = 1 := by
   simp only [σy]
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp
+  solve_matrix
 
 @[simp]
 lemma σz_mul_σz : σz * σz = 1 := by
   simp only [σz]
-  ext i j
-  fin_cases i <;> fin_cases j <;> simp
+  solve_matrix
 
 @[simp]
 lemma controlM_σx : controlM σx = cnot := by
@@ -163,6 +208,5 @@ lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := b
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by
   simp [swap]
-  ext i j
-  fin_cases i <;> fin_cases j <;> rfl
+  solve_matrix
 

@@ -4,7 +4,6 @@ import Mathlib.Data.Matrix.Kronecker
 
 namespace Matrix
 
-@[simp]
 def kroneckerCMatrix (m₁ : CMatrix a b) (m₂ : CMatrix c d) : CMatrix (a * c) (b * d) :=
   of fun x y => m₁ x.divNat y.divNat * m₂ x.modNat y.modNat
 
@@ -19,12 +18,12 @@ open KroneckerCMatrix
 
 @[simp]
 theorem zero_kroneckerCMatrix (B : CMatrix n p) : (0 : CMatrix l m) ⊗ B = 0 := by
-  simp
+  simp [kroneckerCMatrix]
   rfl
 
 @[simp]
 theorem kroneckerCMatrix_zero (A : CMatrix l m) : A ⊗ (0 : CMatrix n p) = 0 := by
-  simp
+  simp [kroneckerCMatrix]
   rfl
 
 @[simp]
@@ -84,15 +83,13 @@ theorem kroneckerCMatrix_assoc (A : CMatrix l m) (B : CMatrix n p) (C : CMatrix 
     reindex (finCongr <| Nat.mul_assoc _ _ _) (finCongr <| Nat.mul_assoc _ _ _) (A ⊗ B ⊗ C) =
     A ⊗ (B ⊗ C) := by
   ext i j
-  simp
+  simp [kroneckerCMatrix]
   rw [mul_assoc]
   congr 2 <;> simp [Fin.divNat, Fin.modNat]
   · rw [Nat.div_div_eq_div_mul, Nat.mul_comm q n]
   · rw [Nat.div_div_eq_div_mul, Nat.mul_comm r p]
   · congr <;> rw [Nat.mod_mul_left_div_self]
 
-#find (_ * (_ + 1))
- 
 theorem trace_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
     trace (A ⊗ B) = trace A * trace B := by
   simp [trace]
@@ -115,5 +112,16 @@ theorem inv_kroneckerCMatrix
   simp_rw [kroneckerCMatrix_def]
   simp [inv_kronecker]
 
+@[simp]
+theorem transpose_kroneckerCMatrix : ∀ (A : CMatrix l m) (B : CMatrix n p),
+  (A ⊗ B)ᵀ = Aᵀ ⊗ Bᵀ := by
+    intros
+    simp [kroneckerCMatrix, transpose]
+
+@[simp]
+theorem conjTranspose_kroneckerCMatrix : ∀ (A : CMatrix l m) (B : CMatrix n p),
+  (A ⊗ B)ᴴ = Aᴴ ⊗ Bᴴ := by
+    intros
+    simp [conjTranspose, transpose, kroneckerCMatrix, Matrix.map]
 
 end Matrix
