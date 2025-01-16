@@ -1,14 +1,16 @@
 import Quantumlib.Data.Basic
-import Quantumlib.Data.Gate.Rotation
+import Quantumlib.Data.Gate.Rotate
 import Quantumlib.Data.Matrix.Unitary
 
 import Mathlib.LinearAlgebra.UnitaryGroup
 
+open Matrix
+
 open Complex in
-lemma rotation_isUnitary : ∀ θ φ δ, (rotation θ φ δ).IsUnitary := by
+lemma rotate_isUnitary : ∀ θ φ δ, (rotate θ φ δ).IsUnitary := by
   intros θ φ δ
-  simp_rw [Matrix.mem_unitaryGroup_iff', star, rotation_conjTranspose]
-  simp only [rotation]
+  simp_rw [Matrix.mem_unitaryGroup_iff', star, rotate_conjTranspose]
+  simp only [rotate]
   ext i j
   rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j
@@ -16,6 +18,7 @@ lemma rotation_isUnitary : ∀ θ φ δ, (rotation θ φ δ).IsUnitary := by
     <;> rw [neg_div]
   all_goals try rw [Complex.cos_neg]
   all_goals try rw [Complex.sin_neg]
+  -- Getting the exps next to each other and simplifying
   · calc
       _ = (cos (↑θ / 2)) ^ 2 + exp (-↑φ * I) * exp (↑φ * I) * (sin (↑θ / 2)) ^ 2 := by ring_nf
       _ = (cos (↑θ / 2)) ^ 2 + exp (-↑φ * I + ↑φ * I) * (sin (↑θ / 2)) ^ 2 := by rw [exp_add]
@@ -40,31 +43,31 @@ lemma rotation_isUnitary : ∀ θ φ δ, (rotation θ φ δ).IsUnitary := by
       _ = _ := by simp
 
 lemma hadamard_isUnitary : hadamard.IsUnitary := by 
-  rw [←rotation_hadamard]
-  apply rotation_isUnitary
+  rw [←rotate_hadamard]
+  apply rotate_isUnitary
 
 lemma σx_isUnitary : σx.IsUnitary := by
-  rw [←rotation_σx]
-  apply rotation_isUnitary
+  rw [←rotate_σx]
+  apply rotate_isUnitary
 
 lemma σy_isUnitary : σy.IsUnitary := by
-  rw [←rotation_σy]
-  apply rotation_isUnitary
+  rw [←rotate_σy]
+  apply rotate_isUnitary
 
 lemma σz_isUnitary : σz.IsUnitary := by
-  rw [←rotation_σz]
-  apply rotation_isUnitary
+  rw [←rotate_σz]
+  apply rotate_isUnitary
 
-lemma phase_isUnitary : ∀ φ, (phaseShift φ).IsUnitary := by
+lemma phaseShift_isUnitary : ∀ φ, (phaseShift φ).IsUnitary := by
   intros φ
-  rw [←rotation_phaseShift φ]
-  apply rotation_isUnitary
+  rw [←rotate_phaseShift φ]
+  apply rotate_isUnitary
 
 lemma sGate_isUnitary : sGate.IsUnitary := by 
-  apply phase_isUnitary
+  apply phaseShift_isUnitary
 
 lemma tGate_isUnitary : tGate.IsUnitary := by 
-  apply phase_isUnitary
+  apply phaseShift_isUnitary
 
 lemma controlM_isUnitary : ∀ (M : CSquare n),
   M.IsUnitary → (controlM M).IsUnitary := by
@@ -75,4 +78,33 @@ lemma controlM_isUnitary : ∀ (M : CSquare n),
     unfold controlM
     admit
 
-lemma 
+lemma cnot_isUnitary : cnot.IsUnitary := by
+  simp_rw [Matrix.mem_unitaryGroup_iff', cnot]
+  ext i j
+  rw [Matrix.mul_apply]
+  fin_cases i <;> fin_cases j <;> simp [Finset.sum]
+
+lemma notc_isUnitary : notc.IsUnitary := by
+  simp_rw [Matrix.mem_unitaryGroup_iff', notc]
+  ext i j
+  rw [Matrix.mul_apply]
+  fin_cases i <;> fin_cases j <;> simp [Finset.sum]
+
+
+lemma one_isUnitary : (1 : CSquare n).IsUnitary := by
+  simp_rw [Matrix.mem_unitaryGroup_iff']
+  simp
+
+
+lemma not_zero_isUnitary {n : ℕ} : ¬(0 : CSquare n.succ).IsUnitary := by
+  simp_rw [Matrix.mem_unitaryGroup_iff']
+  simp
+
+lemma swap_isUnitary : swap.IsUnitary := by
+  simp_rw [Matrix.mem_unitaryGroup_iff', swap]
+  ext i j
+  rw [Matrix.mul_apply]
+  fin_cases i <;> fin_cases j <;> simp [Finset.sum]
+
+
+

@@ -47,7 +47,5 @@ theorem smul_of_isUnitary : ∀ (c : ℂ) (M : CSquare n),
     simp
 
 
-
-
 end Matrix
 

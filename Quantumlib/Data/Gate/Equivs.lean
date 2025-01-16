@@ -3,8 +3,7 @@ import Quantumlib.Data.Basis.Equivs
 import Quantumlib.Data.Gate.Basic
 import Quantumlib.Data.Gate.Pauli
 import Quantumlib.Data.Gate.PhaseShift
-import Quantumlib.Data.Gate.Rotation
-import Quantumlib.Data.Matrix.Basic
+import Quantumlib.Data.Gate.Rotate
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.KroneckerCMatrix
 import Quantumlib.Tactic.Basic
@@ -27,6 +26,12 @@ lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
     <;> simp
     <;> ring_nf
 
+@[simp]
+lemma hadamard_transpose : hadamardᵀ = hadamard := by
+  simp [hadamard]
+  ext i j
+  fin_cases i <;> fin_cases j <;> rfl
+
 
 @[simp]
 lemma sqrtx_mul_sqrtx : sqrtx * sqrtx = σx := by
@@ -48,16 +53,16 @@ lemma sqrtx_decompose :
     <;> field_simp
 
 @[simp]
-lemma xRotation_pi : xRotation π = -Complex.I • σx := by
-  simp [xRotation, σx]
+lemma xRotate_pi : xRotate π = -Complex.I • σx := by
+  simp [xRotate, σx]
 
 @[simp]
-lemma yRotation_pi : yRotation π = -Complex.I • σy := by
-  simp [yRotation, σy]
+lemma yRotate_pi : yRotate π = -Complex.I • σy := by
+  simp [yRotate, σy]
 
 @[simp]
-lemma rotation_hadamard : rotation (π / 2) 0 π = hadamard := by
-  simp [rotation, hadamard]
+lemma rotate_hadamard : rotate (π / 2) 0 π = hadamard := by
+  simp [rotate, hadamard]
   ring_nf
   rw [mul_one_div]
   ext i j
@@ -66,23 +71,23 @@ lemma rotation_hadamard : rotation (π / 2) 0 π = hadamard := by
     <;> simp
 
 @[simp]
-lemma rotation_σx : rotation π 0 π = σx := by
-  simp [rotation, σx]
+lemma rotate_σx : rotate π 0 π = σx := by
+  simp [rotate, σx]
   
 @[simp]
-lemma rotation_σy : rotation π (π / 2) (π / 2) = σy := by
-  simp only [rotation, σy]
+lemma rotate_σy : rotate π (π / 2) (π / 2) = σy := by
+  simp only [rotate, σy]
   rw [Complex.exp_mul_I]
   simp
 
 @[simp]
-lemma rotation_σz : rotation 0 0 π = σz := by
-  simp [rotation, σz]
+lemma rotate_σz : rotate 0 0 π = σz := by
+  simp [rotate, σz]
 
-lemma rotation_xRotation : ∀ θ,
-  rotation θ (3 * π / 2) (π / 2) = xRotation θ := by
+lemma rotate_xRotate : ∀ θ,
+  rotate θ (3 * π / 2) (π / 2) = xRotate θ := by
   intros θ
-  simp [rotation, xRotation]
+  simp [rotate, xRotate]
   rw [Complex.exp_mul_I]
   simp
   ext i j
@@ -93,32 +98,18 @@ lemma rotation_xRotation : ∀ θ,
   rw [Complex.exp_mul_I]
   simp
 
-lemma rotation_yRotation : ∀ θ,
-  rotation θ 0 0 = yRotation θ := by
+lemma rotate_yRotate : ∀ θ,
+  rotate θ 0 0 = yRotate θ := by
   intros
-  simp [rotation, yRotation]
+  simp [rotate, yRotate]
 
-lemma rotation_phaseShift : ∀ θ,
-  rotation 0 0 θ = phaseShift θ := by
-  simp [rotation, phaseShift]
+lemma rotate_phaseShift : ∀ θ,
+  rotate 0 0 θ = phaseShift θ := by
+  simp [rotate, phaseShift]
 
-lemma rotation_1 : rotation 0 0 0 = 1 := by
-  simp [rotation]
+lemma rotate_1 : rotate 0 0 0 = 1 := by
+  simp [rotate]
   solve_matrix
-
-@[simp]
-lemma rotation_conjTranspose : ∀ θ φ δ, (rotation θ φ δ)ᴴ = rotation (-θ) (-δ) (-φ) := by
-  intros θ φ δ
-  simp [rotation]
-  ext i j
-  rw [Matrix.conjTranspose_apply]
-  fin_cases i <;> fin_cases j
-    <;> simp [←Complex.exp_conj, ←Complex.cos_conj, ←Complex.sin_conj]
-    <;> field_simp [OfNat.ofNat]
-    <;> rw [neg_div]
-  all_goals try rw [Complex.cos_neg]
-  all_goals try rw [Complex.sin_neg]
-  all_goals ring_nf
 
 @[simp]
 lemma phaseShift_0 : phaseShift 0 = 1 := by
