@@ -92,13 +92,9 @@ theorem kroneckerCMatrix_assoc (A : CMatrix l m) (B : CMatrix n p) (C : CMatrix 
 
 theorem trace_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
     trace (A ⊗ B) = trace A * trace B := by
-  simp [trace]
+  simp_rw [trace, Finset.sum_mul_sum, ←Equiv.sum_comp (e := finProdFinEquiv), ←Finset.univ_product_univ, Finset.sum_product]
+  simp [kroneckerCMatrix_def]
   
-  induction n
-  case zero => simp
-  case succ n' ih =>
-
-    admit
 
 
  theorem det_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :

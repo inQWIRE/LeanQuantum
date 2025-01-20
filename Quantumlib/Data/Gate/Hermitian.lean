@@ -18,7 +18,6 @@ elab "make_hermitian " gates:ident+ : command => do
       @[simp]
       lemma $name : ($gate).IsHermitian := by
         unfold $gate
-        simp [IsHermitian]
         solve_matrix
     )
     elabCommand decl
@@ -35,3 +34,8 @@ lemma controlM_isHermitian : ∀ (M : CSquare n),
     simp only [IsHermitian] at h ⊢
     rw [controlM_conjTranspose, h]
 
+lemma braket0_isHermitian : ∣0⟩⟨0∣.IsHermitian := by
+  solve_matrix
+
+lemma braket1_isHermitian : ∣1⟩⟨1∣.IsHermitian := by
+  solve_matrix

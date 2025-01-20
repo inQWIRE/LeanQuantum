@@ -1,4 +1,5 @@
 import Quantumlib.Data.Basic
+import Quantumlib.Data.Gate.ConjTranspose
 import Quantumlib.Data.Gate.Rotate
 import Quantumlib.Data.Matrix.Unitary
 
@@ -16,8 +17,8 @@ lemma rotate_isUnitary : ∀ θ φ δ, (rotate θ φ δ).IsUnitary := by
   fin_cases i <;> fin_cases j
     <;> simp
     <;> rw [neg_div]
-  all_goals try rw [Complex.cos_neg]
-  all_goals try rw [Complex.sin_neg]
+  all_goals try rw [cos_neg]
+  all_goals try rw [sin_neg]
   -- Getting the exps next to each other and simplifying
   · calc
       _ = (cos (↑θ / 2)) ^ 2 + exp (-↑φ * I) * exp (↑φ * I) * (sin (↑θ / 2)) ^ 2 := by ring_nf
@@ -26,7 +27,7 @@ lemma rotate_isUnitary : ∀ θ φ δ, (rotate θ φ δ).IsUnitary := by
   · calc
       _ = -exp (↑δ * I) * cos (↑θ / 2) * sin (↑θ / 2) +
            exp (-↑φ * I) * exp ((↑φ + ↑δ) * I) * cos (↑θ / 2) * sin (↑θ / 2) := by ring_nf
-      _ = -exp (↑δ * Complex.I) * cos (↑θ / 2) * sin (↑θ / 2) +
+      _ = -exp (↑δ * I) * cos (↑θ / 2) * sin (↑θ / 2) +
            exp (↑δ * I) * cos (↑θ / 2) * sin (↑θ / 2) := by rw [←exp_add]; ring_nf
       _ = _ := by simp
   · calc
@@ -37,7 +38,7 @@ lemma rotate_isUnitary : ∀ θ φ δ, (rotate θ φ δ).IsUnitary := by
     _ = _ := by ring_nf
   · calc
       _ = exp (-↑δ * I) * exp (↑δ * I) * (sin (↑θ / 2)) ^ 2 +
-          exp ((-↑δ + -↑φ) * I) * exp ((↑φ + ↑δ) * Complex.I) * (cos (↑θ / 2)) ^ 2 := by ring_nf
+          exp ((-↑δ + -↑φ) * I) * exp ((↑φ + ↑δ) * I) * (cos (↑θ / 2)) ^ 2 := by ring_nf
       _ = exp 0 * (sin (↑θ / 2)) ^ 2 + exp 0 * (cos (↑θ / 2)) ^ 2 := by
         repeat rw [←exp_add]; ring_nf
       _ = _ := by simp
@@ -76,6 +77,8 @@ lemma controlM_isUnitary : ∀ (M : CSquare n),
     ext i j
     simp_rw [Matrix.mul_apply, Matrix.conjTranspose_apply]
     unfold controlM
+    generalize hi : Fin.cast _ i = i' 
+    generalize hj : Fin.cast _ j = j' 
     admit
 
 lemma cnot_isUnitary : cnot.IsUnitary := by
@@ -90,11 +93,9 @@ lemma notc_isUnitary : notc.IsUnitary := by
   rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;> simp [Finset.sum]
 
-
 lemma one_isUnitary : (1 : CSquare n).IsUnitary := by
   simp_rw [Matrix.mem_unitaryGroup_iff']
   simp
-
 
 lemma not_zero_isUnitary {n : ℕ} : ¬(0 : CSquare n.succ).IsUnitary := by
   simp_rw [Matrix.mem_unitaryGroup_iff']
@@ -105,6 +106,4 @@ lemma swap_isUnitary : swap.IsUnitary := by
   ext i j
   rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;> simp [Finset.sum]
-
-
 

@@ -32,7 +32,7 @@ lemma controlM_conjTranspose : ∀ (M : CSquare n), (controlM M)ᴴ = controlM M
 @[simp]
 lemma rotate_conjTranspose : ∀ θ φ δ, (rotate θ φ δ)ᴴ = rotate (-θ) (-δ) (-φ) := by
   intros θ φ δ
-  simp [rotate]
+  simp only [rotate]
   ext i j
   rw [Matrix.conjTranspose_apply]
   fin_cases i <;> fin_cases j

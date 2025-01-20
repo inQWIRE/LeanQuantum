@@ -108,12 +108,12 @@ lemma rotate_phaseShift : ∀ θ,
   simp [rotate, phaseShift]
 
 lemma rotate_1 : rotate 0 0 0 = 1 := by
-  simp [rotate]
+  simp only [rotate]
   solve_matrix
 
 @[simp]
 lemma phaseShift_0 : phaseShift 0 = 1 := by
-  simp [phaseShift]
+  simp only [phaseShift]
   solve_matrix
 
 @[simp]
@@ -122,7 +122,7 @@ lemma phaseShift_π : phaseShift π = σz := by
 
 @[simp]
 lemma phaseShift_2π : phaseShift (2 * π) = 1 := by
-  simp [phaseShift]
+  simp only [phaseShift]
   solve_matrix
 
 @[simp]
@@ -134,7 +134,7 @@ lemma phaseShift_neg_pi : phaseShift (-π) = σz := by
   field_simp
 
 @[simp]
-lemma phaseShift_mul : ∀ θ₁ θ₂, phaseShift θ₁ * phaseShift θ₂ = phaseShift (θ₁ + θ₂) := by
+lemma phaseShift_mul_phaseShift : ∀ θ₁ θ₂, phaseShift θ₁ * phaseShift θ₂ = phaseShift (θ₁ + θ₂) := by
   intros θ₁ θ₂
   simp [phaseShift]
   rw [←Complex.exp_add, add_mul]
@@ -146,7 +146,7 @@ lemma phaseShift_pow : ∀ (n : ℕ) θ, (phaseShift θ) ^ n  = phaseShift (n * 
   case zero => simp
   case succ n' ih => 
     simp [pow_succ]
-    rw [add_mul, ←phaseShift_mul, ih]
+    rw [add_mul, ←phaseShift_mul_phaseShift, ih]
     ring_nf
 
 @[simp]
@@ -198,6 +198,6 @@ lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := b
 
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by
-  simp [swap]
+  simp only [swap]
   solve_matrix
 

@@ -4,9 +4,10 @@ import Quantumlib.Data.Complex.Basic
 
 noncomputable section
 
+open Complex in
 def phaseShift (φ : ℝ) : CSquare 2 :=
   !![1, 0          ;
-     0, Complex.exp (φ * Complex.I)]
+     0, exp (φ * I)]
 
 def sGate : CSquare 2 :=
   phaseShift (π / 2)
