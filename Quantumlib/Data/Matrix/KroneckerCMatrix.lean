@@ -64,9 +64,7 @@ theorem kroneckerCMatrix_one :
 @[simp]
 theorem one_kroneckerCMatrix (B : CMatrix m n) :
     (1 : CMatrix l l) ⊗ B =
-      reindex
-        ((Equiv.prodComm _ _).trans finProdFinEquiv)
-        ((Equiv.prodComm _ _).trans finProdFinEquiv)
+      reindex ((Equiv.prodComm _ _).trans finProdFinEquiv) ((Equiv.prodComm _ _).trans finProdFinEquiv)
         (blockDiagonal fun _ => B) := by
   rw [kroneckerCMatrix_def, one_kronecker]
   rfl
@@ -96,8 +94,7 @@ theorem trace_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
   simp [kroneckerCMatrix_def]
   
 
-
- theorem det_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
+theorem det_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
     det (A ⊗ B) = det A ^ Fintype.card (Fin n) * det B ^ Fintype.card (Fin m) := by
   rw [kroneckerCMatrix_def]
   simp [det_kronecker]
