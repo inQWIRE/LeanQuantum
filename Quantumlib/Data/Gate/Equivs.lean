@@ -28,18 +28,16 @@ lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
 
 @[simp]
 lemma hadamard_transpose : hadamardᵀ = hadamard := by
-  simp [hadamard]
+  simp only [hadamard]
   ext i j
   fin_cases i <;> fin_cases j <;> rfl
 
-
 @[simp]
 lemma sqrtx_mul_sqrtx : sqrtx * sqrtx = σx := by
-  simp [sqrtx, σx]
+  simp only [sqrtx, σx]
   ext i j
   fin_cases i <;> fin_cases j
-    <;> field_simp
-    <;> apply Complex.ext
+    <;> apply Complex.ext 
     <;> simp
     <;> ring_nf
 
@@ -86,7 +84,7 @@ lemma rotate_σz : rotate 0 0 π = σz := by
 
 lemma rotate_xRotate : ∀ θ,
   rotate θ (3 * π / 2) (π / 2) = xRotate θ := by
-  intros θ
+  intros
   simp [rotate, xRotate]
   rw [Complex.exp_mul_I]
   simp
@@ -136,7 +134,7 @@ lemma phaseShift_neg_pi : phaseShift (-π) = σz := by
 @[simp]
 lemma phaseShift_mul_phaseShift : ∀ θ₁ θ₂,
   phaseShift θ₁ * phaseShift θ₂ = phaseShift (θ₁ + θ₂) := by
-    intros θ₁ θ₂
+    intros
     simp [phaseShift, ←Complex.exp_add, add_mul]
 
 @[simp]
@@ -176,7 +174,7 @@ lemma σz_mul_σz : σz * σz = 1 := by
 
 lemma controlM_def : ∀ (M : CSquare n),
   controlM M = ∣0⟩⟨0∣ ⊗ 1 + ∣1⟩⟨1∣ ⊗ M := by
-    intros M
+    intros
     ext x y
     simp only [controlM]
     have hxsubn : ↑x - n < n := by omega
@@ -216,16 +214,14 @@ lemma controlM_def : ∀ (M : CSquare n),
               zero_add]
           rfl
         rfl
-      rw [this] 
-      simp [Fin.modNat, Fin.subNat]
+      simp [this, Fin.modNat, Fin.subNat]
       congr <;>
         rwa [Nat.mod_eq, if_pos (by omega),
              Nat.mod_eq_of_lt]
     next h hxy =>
       simp_all [blockDiagonal, kroneckerCMatrix]
       cases h : decide (x < n) <;> simp_all
-      · rename' hxy => hy
-        rename' h => hx
+      · rename' hxy => hy, h => hx
         have : y.divNat = 0 := by
           simp [Fin.divNat]
           conv in ↑y / n =>
@@ -241,8 +237,7 @@ lemma controlM_def : ∀ (M : CSquare n),
                 zero_add]
             rfl
           rfl
-        rw [this]
-        simp
+        simp [this]
       · rename_i hxney
         have : x.divNat = 0 := by
           simp [Fin.divNat]
@@ -250,8 +245,7 @@ lemma controlM_def : ∀ (M : CSquare n),
             rw [Nat.div_eq_of_lt h]
             rfl
           rfl
-        rw [this]
-        simp_all
+        simp_all [this]
         generalize hyDiv : y.divNat = yDiv
         fin_cases yDiv <;> simp
         rw [Matrix.one_apply_ne]
@@ -260,19 +254,17 @@ lemma controlM_def : ∀ (M : CSquare n),
         simp [Fin.modNat] at contra
         apply hxney
         have : ↑y < n := by
-          apply Nat.lt_of_div_eq_zero
-          assumption
+          apply Nat.lt_of_div_eq_zero hngt0
           rw [Fin.ext_iff] at hyDiv
-          simp at hyDiv
-          simp
-          assumption
-        rw [Nat.mod_eq, if_neg (by omega), Nat.mod_eq, if_neg (by omega)] at contra
-        rwa [Fin.ext_iff]
+          simp_all
+        rwa [Nat.mod_eq, if_neg (by omega),
+             Nat.mod_eq, if_neg (by omega),
+             ←Fin.ext_iff] at contra
 
 @[simp]
 lemma controlM_mul_controlM : ∀ (M₁ M₂ : CSquare n),
   controlM M₁ * controlM M₂ = controlM (M₁ * M₂) := by
-    intros M₁ M₂
+    intros
     repeat rw [controlM_def]
     repeat rw [mul_add]
     repeat rw [add_mul]
@@ -302,7 +294,7 @@ lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := b
   rw [Matrix.add_apply]
   simp [kroneckerCMatrix, σx, notc]
   fin_cases i <;> fin_cases j
-    <;> simp [cnot, Fin.divNat, Fin.modNat]
+    <;> simp_all [cnot, Fin.divNat, Fin.modNat]
 
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by

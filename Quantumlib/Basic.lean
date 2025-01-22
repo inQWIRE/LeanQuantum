@@ -1,1 +1,2 @@
-def hello := "Quantum"
+import Quantumlib.Data.Basic
+import Quantumlib.Tactic.Basic

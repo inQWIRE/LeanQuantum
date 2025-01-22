@@ -64,7 +64,7 @@ theorem kroneckerCMatrix_one :
 @[simp]
 theorem one_kroneckerCMatrix (B : CMatrix m n) :
     (1 : CMatrix l l) ⊗ B =
-      reindex ((Equiv.prodComm _ _).trans finProdFinEquiv) ((Equiv.prodComm _ _).trans finProdFinEquiv)
+      reindex ((Equiv.prodComm ..).trans finProdFinEquiv) ((Equiv.prodComm ..).trans finProdFinEquiv)
         (blockDiagonal fun _ => B) := by
   rw [kroneckerCMatrix_def, one_kronecker]
   rfl
@@ -78,7 +78,7 @@ theorem mul_kroneckerCMatrix_mul (A : CMatrix l m)
   simp
 
 theorem kroneckerCMatrix_assoc (A : CMatrix l m) (B : CMatrix n p) (C : CMatrix q r) :
-    reindex (finCongr <| Nat.mul_assoc _ _ _) (finCongr <| Nat.mul_assoc _ _ _) (A ⊗ B ⊗ C) =
+    reindex (finCongr <| Nat.mul_assoc ..) (finCongr <| Nat.mul_assoc ..) (A ⊗ B ⊗ C) =
     A ⊗ (B ⊗ C) := by
   ext i j
   simp [kroneckerCMatrix]
@@ -90,12 +90,14 @@ theorem kroneckerCMatrix_assoc (A : CMatrix l m) (B : CMatrix n p) (C : CMatrix 
 
 theorem trace_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
     trace (A ⊗ B) = trace A * trace B := by
-  simp_rw [trace, Finset.sum_mul_sum, ←Equiv.sum_comp (e := finProdFinEquiv), ←Finset.univ_product_univ, Finset.sum_product]
+  simp_rw [trace, Finset.sum_mul_sum,
+           ←Equiv.sum_comp (e := finProdFinEquiv),
+           ←Finset.univ_product_univ, Finset.sum_product]
   simp [kroneckerCMatrix_def]
   
 
 theorem det_kroneckerCMatrix (A : CMatrix m m) (B : CMatrix n n) :
-    det (A ⊗ B) = det A ^ Fintype.card (Fin n) * det B ^ Fintype.card (Fin m) := by
+    det (A ⊗ B) = det A ^ n * det B ^ m := by
   rw [kroneckerCMatrix_def]
   simp [det_kronecker]
 

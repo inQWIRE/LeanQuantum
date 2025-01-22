@@ -74,7 +74,7 @@ lemma controlM_isUnitary : ∀ (M : CSquare n),
   M.IsUnitary → (controlM M).IsUnitary := by
     intros M h
     simp_rw [Matrix.mem_unitaryGroup_iff', star] at h ⊢
-    rw [controlM_conjTranspose, controlM_mul_controlM, h, controlM_1]
+    simp [h]
 
 lemma cnot_isUnitary : cnot.IsUnitary := by
   simp_rw [Matrix.mem_unitaryGroup_iff', cnot]
