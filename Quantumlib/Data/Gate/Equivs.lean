@@ -186,7 +186,6 @@ lemma controlM_def : ∀ (M : CSquare n),
       simp_all
       obtain ⟨left, right⟩ := h
       subst right
-      simp [kroneckerCMatrix]
       have : x.divNat = 0 := by
         simp [Fin.divNat]
         conv in ↑x / n =>
@@ -195,7 +194,7 @@ lemma controlM_def : ∀ (M : CSquare n),
         rfl
       simp [this]
     next h hxy =>
-      simp_all [blockDiagonal, kroneckerCMatrix]
+      simp_all [blockDiagonal]
       obtain ⟨hx, hy⟩ := hxy
       have : y.divNat = 1 := by
         simp [Fin.divNat]
@@ -219,7 +218,7 @@ lemma controlM_def : ∀ (M : CSquare n),
         rwa [Nat.mod_eq, if_pos (by omega),
              Nat.mod_eq_of_lt]
     next h hxy =>
-      simp_all [blockDiagonal, kroneckerCMatrix]
+      simp_all [blockDiagonal]
       cases h : decide (x < n) <;> simp_all
       · rename' hxy => hy, h => hx
         have : y.divNat = 0 := by
@@ -248,7 +247,7 @@ lemma controlM_def : ∀ (M : CSquare n),
         simp_all [this]
         generalize hyDiv : y.divNat = yDiv
         fin_cases yDiv <;> simp
-        rw [Matrix.one_apply_ne]
+        rw [if_neg]
         simp [Fin.divNat] at hyDiv
         intros contra
         simp [Fin.modNat] at contra
@@ -291,10 +290,9 @@ lemma cnot_decompose : ∣1⟩⟨1∣ ⊗ σx + ∣0⟩⟨0∣ ⊗ 1 = cnot := b
 @[simp]
 lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := by
   ext i j
-  rw [Matrix.add_apply]
-  simp [kroneckerCMatrix, σx, notc]
+  simp [-one_kroneckerCMatrix, σx, notc]
   fin_cases i <;> fin_cases j
-    <;> simp_all [cnot, Fin.divNat, Fin.modNat]
+    <;> simp [Fin.modNat, Fin.divNat]
 
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by

@@ -17,6 +17,11 @@ scoped[KroneckerCMatrix] infixl:100 " ⊗ " => Matrix.kroneckerCMatrix
 open KroneckerCMatrix
 
 @[simp]
+theorem kroneckerCMatrix_apply (A : CMatrix l m) (B : CMatrix n p) (i j) :
+    (A ⊗ B) i j = A i.divNat j.divNat * B i.modNat j.modNat :=
+  rfl
+
+@[simp]
 theorem zero_kroneckerCMatrix (B : CMatrix n p) : (0 : CMatrix l m) ⊗ B = 0 := by
   simp [kroneckerCMatrix]
   rfl
