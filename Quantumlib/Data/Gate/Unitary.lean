@@ -92,7 +92,7 @@ lemma one_isUnitary : (1 : CSquare n).IsUnitary := by
   simp_rw [Matrix.mem_unitaryGroup_iff']
   simp
 
-lemma not_zero_isUnitary {n : ℕ} : ¬(0 : CSquare n.succ).IsUnitary := by
+lemma not_zero_isUnitary {n : ℕ} [NeZero n] : ¬(0 : CSquare n).IsUnitary := by
   simp_rw [Matrix.mem_unitaryGroup_iff']
   simp
 
