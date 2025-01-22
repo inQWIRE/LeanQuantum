@@ -4,4 +4,4 @@ import Quantumlib.Data.Gate.Basic
 import Quantumlib.Data.Gate.Equivs
 import Quantumlib.Data.Gate.Pauli
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron

@@ -5,14 +5,14 @@ import Quantumlib.Data.Gate.Pauli
 import Quantumlib.Data.Gate.PhaseShift
 import Quantumlib.Data.Gate.Rotate
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
-open Matrix KroneckerCMatrix
+open Matrix Kron
 
 @[simp]
 lemma hadamardK_1 : hadamardK 1 = hadamard := by
-  simp only [hadamardK, kroneckerCMatrix_one]
+  simp only [hadamardK, kron_one]
   ext i j
   fin_cases i <;> fin_cases j <;> rfl
 
@@ -267,14 +267,14 @@ lemma controlM_mul_controlM : ∀ (M₁ M₂ : CSquare n),
     repeat rw [controlM_def]
     repeat rw [mul_add]
     repeat rw [add_mul]
-    repeat rw [←mul_kroneckerCMatrix_mul]
+    repeat rw [←mul_kron_mul]
     simp [-ketbra0_def, -ketbra1_def]
 
 @[simp]
 lemma controlM_1 : controlM (1 : CSquare n) = 1 := by
-  rw [controlM_def, ←add_kroneckerCMatrix,
+  rw [controlM_def, ←add_kron,
       ketbra0_plus_ketbra1,
-      one_kroneckerCMatrix_one]
+      one_kron_one]
 
 @[simp]
 lemma controlM_σx : controlM σx = cnot := by
@@ -290,7 +290,7 @@ lemma cnot_decompose : ∣1⟩⟨1∣ ⊗ σx + ∣0⟩⟨0∣ ⊗ 1 = cnot := b
 @[simp]
 lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := by
   ext i j
-  simp [-one_kroneckerCMatrix, σx, notc]
+  simp [-one_kron, σx, notc]
   fin_cases i <;> fin_cases j
     <;> simp [Fin.modNat, Fin.divNat]
 

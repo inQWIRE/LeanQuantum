@@ -1,5 +1,5 @@
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Data.Complex.Basic
 
 noncomputable section 

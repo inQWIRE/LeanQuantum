@@ -1,12 +1,12 @@
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron
 
 import Mathlib.Data.Complex.Basic
 import Mathlib.Data.Complex.Exponential
 import Mathlib.Data.Matrix.Kronecker
 import Mathlib.Data.Real.Sqrt
 
-open Matrix KroneckerCMatrix
+open Matrix Kron
 
 @[reducible]
 def ket0 : CVector 2 :=

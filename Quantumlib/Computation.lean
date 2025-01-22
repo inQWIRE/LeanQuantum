@@ -1,6 +1,6 @@
 import Quantumlib.Basic
 
-open Matrix KroneckerCMatrix
+open Matrix Kron
 
 @[simp]
 lemma σx_mul_ket0 : σx * ∣0⟩ = ∣1⟩ := by

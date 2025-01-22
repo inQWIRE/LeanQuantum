@@ -1,8 +1,8 @@
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Data.Complex.Basic
 
-open Matrix KroneckerCMatrix
+open Matrix Kron
 
 noncomputable def hadamard : CSquare 2 :=
   √ 2⁻¹ • !![1,  1;

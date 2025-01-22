@@ -1,7 +1,7 @@
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron
 
-open KroneckerCMatrix
+open Kron
 
 namespace Matrix
 

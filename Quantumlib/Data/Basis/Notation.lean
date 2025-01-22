@@ -1,10 +1,10 @@
 import Quantumlib.Data.Basis.Basic
 import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.KroneckerCMatrix
+import Quantumlib.Data.Matrix.Kron
 
 import Lean
 
-open Matrix KroneckerCMatrix
+open Matrix Kron
 
 open Lean PrettyPrinter Delaborator
 
@@ -57,7 +57,7 @@ def bra0Unexpander : Unexpander
 def bra1Unexpander : Unexpander
   | `($(_)) => `((⟨1∣))
 
-@[app_unexpander kroneckerCMatrix]
+@[app_unexpander kron]
 def finKronUnexpander : Unexpander
   | `($(_) ∣$num₁:num⟩ ∣$num₂:num⟩) => do
     let n₁ := (num₁.raw.isLit? `num).get!
@@ -82,16 +82,15 @@ def hmulUnexpander : Unexpander
 
 example : ∣01⟩ = ![0, 1, 0, 0] := by
   ext i j
-  simp [kroneckerCMatrix]
+  rw [kron_apply]
   fin_cases i <;> 
-    simp [Fin.divNat, Fin.modNat, vecHead, vecTail]
+    simp [Fin.divNat, Fin.modNat]
 
 example : ⟨10∣ = !![0, 0, 1, 0] := by
   ext i j
-  simp [kroneckerCMatrix]
+  rw [kron_apply]
   fin_cases j
-    <;> simp [vecCons, Fin.divNat, Fin.modNat]
-    <;> rfl
+    <;> simp [Fin.divNat, Fin.modNat]
 
 notation "∣+⟩" => xbasisPlus
 notation "∣-⟩" => xbasisMinus
