@@ -92,7 +92,7 @@ lemma q1_mul_bra1_mul_ket1_mul_q2 : ∀ (q₁ : CMatrix 2 1) (q₂ : CMatrix 1 2
 @[simp]
 lemma swap_def : ∀ (q₁ q₂ : CVector 2), swap * (q₁ ⊗ q₂) = q₂ ⊗ q₁ := by
   intros
-  simp [swap, vecHead, vecTail, Fin.modNat, Fin.divNat]
+  simp [swap, kroneckerCMatrix, vecHead, vecTail, Fin.modNat, Fin.divNat]
   ext i
   fin_cases i <;> simp <;> ring_nf!
 
