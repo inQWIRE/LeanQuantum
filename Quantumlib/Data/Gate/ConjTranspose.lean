@@ -15,15 +15,9 @@ lemma controlM_conjTranspose : ∀ (M : CSquare n), (controlM M)ᴴ = controlM M
   ext i j
   rw [conjTranspose_apply]
   simp only [controlM]
-  generalize (Nat.two_mul n) = pf
-  cases h : decide (Fin.cast _ j = Fin.cast _ i)
-  · have h' : decide (Fin.cast pf i = Fin.cast pf j) = false := by
-      simp_all
-      rwa [eq_comm]
-    rw [h']
-    simp
-    split_ifs <;> simp
-  · cases hlt : decide (Fin.cast pf i < n) <;> cases hle : decide (n ≤ Fin.cast pf i) <;> simp_all
+  cases h : decide (j = i)
+  · split_ifs <;> simp_all
+  · cases hlt : decide (i < n) <;> cases hle : decide (n ≤ i) <;> simp_all
     split_ifs
     · apply not_lt_of_le at hlt
       contradiction

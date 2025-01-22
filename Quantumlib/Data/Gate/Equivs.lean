@@ -134,20 +134,21 @@ lemma phaseShift_neg_pi : phaseShift (-π) = σz := by
   field_simp
 
 @[simp]
-lemma phaseShift_mul_phaseShift : ∀ θ₁ θ₂, phaseShift θ₁ * phaseShift θ₂ = phaseShift (θ₁ + θ₂) := by
-  intros θ₁ θ₂
-  simp [phaseShift]
-  rw [←Complex.exp_add, add_mul]
+lemma phaseShift_mul_phaseShift : ∀ θ₁ θ₂,
+  phaseShift θ₁ * phaseShift θ₂ = phaseShift (θ₁ + θ₂) := by
+    intros θ₁ θ₂
+    simp [phaseShift, ←Complex.exp_add, add_mul]
 
 @[simp]
-lemma phaseShift_pow : ∀ (n : ℕ) θ, (phaseShift θ) ^ n  = phaseShift (n * θ) := by
-  intros n θ
-  induction n
-  case zero => simp
-  case succ n' ih => 
-    simp [pow_succ]
-    rw [add_mul, ←phaseShift_mul_phaseShift, ih]
-    ring_nf
+lemma phaseShift_pow : ∀ (n : ℕ) θ,
+  (phaseShift θ) ^ n  = phaseShift (n * θ) := by
+    intros n θ
+    induction n
+    case zero => simp
+    case succ n' ih => 
+      simp [pow_succ]
+      rw [add_mul, ←phaseShift_mul_phaseShift, ih]
+      ring_nf
 
 @[simp]
 lemma sGate_mul_sGate : sGate * sGate = σz := by
@@ -173,6 +174,117 @@ lemma σz_mul_σz : σz * σz = 1 := by
   simp only [σz]
   solve_matrix
 
+lemma controlM_def : ∀ (M : CSquare n),
+  controlM M = ∣0⟩⟨0∣ ⊗ 1 + ∣1⟩⟨1∣ ⊗ M := by
+    intros M
+    ext x y
+    simp only [controlM]
+    have hxsubn : ↑x - n < n := by omega
+    have hysubn : ↑y - n < n := by omega
+    have hngt0 : 0 < n := by omega
+
+    split_ifs
+    next h =>
+      simp_all
+      obtain ⟨left, right⟩ := h
+      subst right
+      simp [kroneckerCMatrix]
+      have : x.divNat = 0 := by
+        simp [Fin.divNat]
+        conv in ↑x / n =>
+          rw [Nat.div_eq_of_lt left]
+          rfl
+        rfl
+      simp [this]
+    next h hxy =>
+      simp_all [blockDiagonal, kroneckerCMatrix]
+      obtain ⟨hx, hy⟩ := hxy
+      have : y.divNat = 1 := by
+        simp [Fin.divNat]
+        conv in ↑y / n =>
+          rw [Nat.div_eq_sub_div hngt0 hy,
+              Nat.div_eq_of_lt hysubn,
+              zero_add]
+          rfl
+        rfl
+      rw [this]
+      have : x.divNat = 1 := by
+        simp [Fin.divNat]
+        conv in ↑x / n =>
+          rw [Nat.div_eq_sub_div hngt0 hx,
+              Nat.div_eq_of_lt hxsubn,
+              zero_add]
+          rfl
+        rfl
+      rw [this] 
+      simp [Fin.modNat, Fin.subNat]
+      congr <;>
+        rwa [Nat.mod_eq, if_pos (by omega),
+             Nat.mod_eq_of_lt]
+    next h hxy =>
+      simp_all [blockDiagonal, kroneckerCMatrix]
+      cases h : decide (x < n) <;> simp_all
+      · rename' hxy => hy
+        rename' h => hx
+        have : y.divNat = 0 := by
+          simp [Fin.divNat]
+          conv in ↑y / n =>
+            rw [Nat.div_eq_of_lt hy]
+            rfl
+          rfl
+        rw [this]
+        have : x.divNat = 1 := by
+          simp [Fin.divNat]
+          conv in ↑x / n =>
+            rw [Nat.div_eq_sub_div hngt0 hx,
+                Nat.div_eq_of_lt hxsubn,
+                zero_add]
+            rfl
+          rfl
+        rw [this]
+        simp
+      · rename_i hxney
+        have : x.divNat = 0 := by
+          simp [Fin.divNat]
+          conv in ↑x / n =>
+            rw [Nat.div_eq_of_lt h]
+            rfl
+          rfl
+        rw [this]
+        simp_all
+        generalize hyDiv : y.divNat = yDiv
+        fin_cases yDiv <;> simp
+        rw [Matrix.one_apply_ne]
+        simp [Fin.divNat] at hyDiv
+        intros contra
+        simp [Fin.modNat] at contra
+        apply hxney
+        have : ↑y < n := by
+          apply Nat.lt_of_div_eq_zero
+          assumption
+          rw [Fin.ext_iff] at hyDiv
+          simp at hyDiv
+          simp
+          assumption
+        rw [Nat.mod_eq, if_neg (by omega), Nat.mod_eq, if_neg (by omega)] at contra
+        rwa [Fin.ext_iff]
+
+@[simp]
+lemma controlM_mul_controlM : ∀ (M₁ M₂ : CSquare n),
+  controlM M₁ * controlM M₂ = controlM (M₁ * M₂) := by
+    intros M₁ M₂
+    repeat rw [controlM_def]
+    repeat rw [mul_add]
+    repeat rw [add_mul]
+    repeat rw [←mul_kroneckerCMatrix_mul]
+    simp [-ketbra0_def, -ketbra1_def]
+
+@[simp]
+lemma controlM_1 : controlM (1 : CSquare n) = 1 := by
+  rw [controlM_def, ←add_kroneckerCMatrix,
+      ketbra0_plus_ketbra1,
+      one_kroneckerCMatrix_one]
+
 @[simp]
 lemma controlM_σx : controlM σx = cnot := by
   ext i j
@@ -182,11 +294,7 @@ lemma controlM_σx : controlM σx = cnot := by
 
 @[simp]
 lemma cnot_decompose : ∣1⟩⟨1∣ ⊗ σx + ∣0⟩⟨0∣ ⊗ 1 = cnot := by
-  ext i j
-  rw [Matrix.add_apply]
-  simp [kroneckerCMatrix, σx, cnot]
-  fin_cases i <;> fin_cases j
-    <;> simp [cnot, Fin.divNat, Fin.modNat]
+  rw [←controlM_σx, controlM_def, add_comm]
 
 @[simp]
 lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := by

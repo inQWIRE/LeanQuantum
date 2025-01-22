@@ -22,14 +22,16 @@ noncomputable def sqrtx : CSquare 2 :=
 
 def controlM (M : CSquare n) : CSquare (2 * n) :=
   fun x y =>
-    let x' : Fin (n + n) := Fin.cast (Nat.two_mul _) x
-    let y' : Fin (n + n) := Fin.cast (Nat.two_mul _) y
-    if x' < n && x' = y' then 1
-    else if hx' : n ≤ x' then
-          if hy' : n ≤ y' then
-            M (Fin.subNat n x' hx') (Fin.subNat n y' hy')
-          else 0
-        else 0
+    if x < n && x = y then
+      1
+    else
+      if h : n ≤ x ∧ n ≤ y then
+        let pf := Nat.two_mul n
+        let x' := Fin.cast pf x
+        let y' := Fin.cast pf y
+        M (Fin.subNat n x' h.left) (Fin.subNat n y' h.right)
+      else
+        0
 
 def cnot : CSquare 4 :=
   !![1, 0, 0, 0;
