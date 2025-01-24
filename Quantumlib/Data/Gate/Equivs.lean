@@ -91,9 +91,9 @@ lemma rotate_xRotate : ∀ θ,
   ext i j
   fin_cases i <;> fin_cases j 
     <;> simp
-  rw [add_mul, Complex.exp_add]
-  simp
-  rw [Complex.exp_mul_I]
+  rw [add_mul, Complex.exp_add,
+      Complex.exp_three_pi_div_two,
+      neg_mul, Complex.exp_mul_I]
   simp
 
 lemma rotate_yRotate : ∀ θ,
@@ -280,8 +280,7 @@ lemma controlM_1 : controlM (1 : CSquare n) = 1 := by
 lemma controlM_σx : controlM σx = cnot := by
   ext i j
   fin_cases i <;> fin_cases j
-    <;> simp (config := { decide := true }) [cnot, controlM]
-    <;> rfl
+    <;> simp [cnot, controlM, σx]
 
 @[simp]
 lemma cnot_decompose : ∣1⟩⟨1∣ ⊗ σx + ∣0⟩⟨0∣ ⊗ 1 = cnot := by

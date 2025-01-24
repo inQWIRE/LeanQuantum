@@ -30,10 +30,14 @@ syntax (name := kets) "∣" num "⟩" : term
 
 @[app_unexpander ket0]
 def ket0Unexpander : Unexpander
+  | `($(_) $arg1 $arg2) => `(∣0⟩ $arg1 $arg2)
+  | `($(_) $arg) => `(∣0⟩ $arg)
   | `($(_)) => `(∣0⟩)
 
 @[app_unexpander ket1]
 def ket1Unexpander : Unexpander
+  | `($(_) $arg1 $arg2) => `(∣1⟩ $arg1 $arg2)
+  | `($(_) $arg) => `(∣1⟩ $arg)
   | `($(_)) => `(∣1⟩)
 
 syntax (name := bras) "⟨" num "∣" : term
@@ -51,14 +55,18 @@ syntax (name := bras) "⟨" num "∣" : term
 
 @[app_unexpander bra0]
 def bra0Unexpander : Unexpander
+  | `($(_) $arg1 $arg2) => `((⟨0∣) $arg1 $arg2)
+  | `($(_) $arg) => `((⟨0∣) $arg)
   | `($(_)) => `((⟨0∣))
 
 @[app_unexpander bra1]
 def bra1Unexpander : Unexpander
+  | `($(_) $arg1 $arg2) => `((⟨1∣) $arg1 $arg2)
+  | `($(_) $arg) => `((⟨1∣) $arg)
   | `($(_)) => `((⟨1∣))
 
 @[app_unexpander kron]
-def finKronUnexpander : Unexpander
+def kronUnexpander : Unexpander
   | `($(_) ∣$num₁:num⟩ ∣$num₂:num⟩) => do
     let n₁ := (num₁.raw.isLit? `num).get!
     let n₂ := (num₂.raw.isLit? `num).get!
