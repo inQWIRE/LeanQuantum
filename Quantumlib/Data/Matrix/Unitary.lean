@@ -13,10 +13,8 @@ theorem transpose_of_isUnitary : ∀ (M : CSquare n),
     simp_rw [mem_unitaryGroup_iff']
     simp_rw [mem_unitaryGroup_iff] at h
     simp only [star] at *
-    have : Mᵀᴴ = Mᴴᵀ := by
-      ext i j
-      simp_rw [conjTranspose_apply, transpose_apply, conjTranspose_apply]
-    rw [this, ←transpose_mul, h, transpose_one]
+    rw [←conjTranspose_transpose_comm,
+        ←transpose_mul, h, transpose_one]
 
 theorem conjTranspose_of_isUnitary : ∀ (M : CSquare n),
   M.IsUnitary → Mᴴ.IsUnitary := by
@@ -26,11 +24,11 @@ theorem conjTranspose_of_isUnitary : ∀ (M : CSquare n),
     simp only [star] at *
     simpa
 
-theorem kroneckerCMatrix_of_isUnitary : ∀ (M₁ : CSquare m) (M₂ : CSquare n),
+theorem kron_of_isUnitary : ∀ (M₁ : CSquare m) (M₂ : CSquare n),
   M₁.IsUnitary → M₂.IsUnitary → (M₁ ⊗ M₂).IsUnitary := by
     intros M₁ M₂ h₁ h₂
     simp_rw [mem_unitaryGroup_iff', star] at *
-    rw [conjTranspose_kroneckerCMatrix, ←mul_kroneckerCMatrix_mul, h₁, h₂, one_kroneckerCMatrix_one]
+    rw [conjTranspose_kron, ←mul_kron_mul, h₁, h₂, one_kron_one]
 
 theorem mul_of_isUnitary : ∀ (M₁ M₂ : CSquare n),
   M₁.IsUnitary → M₂.IsUnitary → (M₁ * M₂).IsUnitary := by

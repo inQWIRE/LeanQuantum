@@ -4,37 +4,28 @@ open Matrix Kron
 
 @[simp]
 lemma σx_mul_ket0 : σx * ∣0⟩ = ∣1⟩ := by
-  ext i j
-  rw [Matrix.mul_apply]
-  fin_cases i
-    <;> simp [σx]
+  simp only [σx]
+  solve_matrix
 
 @[simp]
 lemma bra0_mul_σx : ⟨0∣ * σx = ⟨1∣ := by
   simp only [σx]
-  ext i j
-  fin_cases j
-    <;> rw [Matrix.mul_apply]
-    <;> simp
+  solve_matrix
 
 @[simp]
 lemma σx_mul_ket1 : σx * ∣1⟩ = ∣0⟩ := by
-  ext i j
-  rw [Matrix.mul_apply]
-  fin_cases i
-    <;> simp [σx]
+  simp only [σx]
+  solve_matrix
 
 @[simp]
 lemma bra1_mul_σx : ⟨1∣ * σx = ⟨0∣ := by
-  ext i j
-  rw [Matrix.mul_apply]
-  fin_cases j
-    <;> simp [σx]
+  simp only [σx]
+  solve_matrix
 
 
 lemma EPRpair_create :
   cnot * (hadamard ⊗ (1 : CSquare 2)) * ∣00⟩ = EPRpair := by
-    simp only [kroneckerCMatrix, cnot, hadamard, EPRpair]
+    simp only [cnot, hadamard, EPRpair]
     ext i j
     simp_rw [Matrix.mul_apply]
     simp [Finset.sum, Fin.modNat, Fin.divNat]
@@ -91,7 +82,9 @@ lemma q1_mul_bra1_mul_ket1_mul_q2 : ∀ (q₁ : CMatrix 2 1) (q₂ : CMatrix 1 2
 @[simp]
 lemma swap_def : ∀ (q₁ q₂ : CVector 2), swap * (q₁ ⊗ q₂) = q₂ ⊗ q₁ := by
   intros
-  simp [swap, kroneckerCMatrix, vecHead, vecTail, Fin.modNat, Fin.divNat]
+  simp only [swap]
   ext i
-  fin_cases i <;> simp <;> ring_nf!
+  rw [Matrix.mul_apply, Matrix.kron_apply]
+  fin_cases i <;> simp [Finset.sum, Fin.divNat, Fin.modNat] <;> ring_nf
+
 

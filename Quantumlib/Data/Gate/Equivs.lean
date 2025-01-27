@@ -12,9 +12,7 @@ open Matrix Kron
 
 @[simp]
 lemma hadamardK_1 : hadamardK 1 = hadamard := by
-  simp only [hadamardK, kron_one]
-  ext i j
-  fin_cases i <;> fin_cases j <;> rfl
+  solve_matrix [hadamardK]
 
 @[simp]
 lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
@@ -28,9 +26,7 @@ lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
 
 @[simp]
 lemma hadamard_transpose : hadamardᵀ = hadamard := by
-  simp only [hadamard]
-  ext i j
-  fin_cases i <;> fin_cases j <;> rfl
+  solve_matrix [hadamard]
 
 @[simp]
 lemma sqrtx_mul_sqrtx : sqrtx * sqrtx = σx := by
@@ -106,13 +102,11 @@ lemma rotate_phaseShift : ∀ θ,
   simp [rotate, phaseShift]
 
 lemma rotate_1 : rotate 0 0 0 = 1 := by
-  simp only [rotate]
-  solve_matrix
+  solve_matrix [rotate]
 
 @[simp]
 lemma phaseShift_0 : phaseShift 0 = 1 := by
-  simp only [phaseShift]
-  solve_matrix
+  solve_matrix [phaseShift]
 
 @[simp]
 lemma phaseShift_π : phaseShift π = σz := by
@@ -120,8 +114,7 @@ lemma phaseShift_π : phaseShift π = σz := by
 
 @[simp]
 lemma phaseShift_2π : phaseShift (2 * π) = 1 := by
-  simp only [phaseShift]
-  solve_matrix
+  solve_matrix [phaseShift]
 
 @[simp]
 lemma phaseShift_neg_pi : phaseShift (-π) = σz := by
@@ -154,23 +147,20 @@ lemma sGate_mul_sGate : sGate * sGate = σz := by
 
 @[simp]
 lemma tGate_mul_tGate : tGate * tGate = sGate := by
-  simp [tGate, sGate]
+  simp only [tGate, phaseShift_mul_phaseShift, sGate]
   ring_nf
 
 @[simp]
 lemma σx_mul_σx : σx * σx = 1 := by
-  simp only [σx]
-  solve_matrix
+  solve_matrix [σx]
 
 @[simp]
 lemma σy_mul_σy : σy * σy = 1 := by
-  simp only [σy]
-  solve_matrix
+  solve_matrix [σy]
 
 @[simp]
 lemma σz_mul_σz : σz * σz = 1 := by
-  simp only [σz]
-  solve_matrix
+  solve_matrix [σz]
 
 lemma controlM_def : ∀ (M : CSquare n),
   controlM M = ∣0⟩⟨0∣ ⊗ 1 + ∣1⟩⟨1∣ ⊗ M := by
@@ -248,8 +238,8 @@ lemma controlM_def : ∀ (M : CSquare n),
         generalize hyDiv : y.divNat = yDiv
         fin_cases yDiv <;> simp
         rw [if_neg]
-        simp [Fin.divNat] at hyDiv
         intros contra
+        simp [Fin.divNat] at hyDiv
         simp [Fin.modNat] at contra
         apply hxney
         have : ↑y < n := by
@@ -278,23 +268,18 @@ lemma controlM_1 : controlM (1 : CSquare n) = 1 := by
 
 @[simp]
 lemma controlM_σx : controlM σx = cnot := by
-  ext i j
-  fin_cases i <;> fin_cases j
-    <;> simp [cnot, controlM, σx]
+  solve_matrix [controlM, σx, cnot]
 
 @[simp]
 lemma cnot_decompose : ∣1⟩⟨1∣ ⊗ σx + ∣0⟩⟨0∣ ⊗ 1 = cnot := by
-  rw [←controlM_σx, controlM_def, add_comm]
+  solve_matrix [cnot, σx]
 
 @[simp]
 lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := by
-  ext i j
-  simp [-one_kron, σx, notc]
-  fin_cases i <;> fin_cases j
-    <;> simp [Fin.modNat, Fin.divNat]
+  solve_matrix [notc, σx]
 
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by
-  simp only [swap]
+  simp only [swap, cons_mul]
   solve_matrix
 

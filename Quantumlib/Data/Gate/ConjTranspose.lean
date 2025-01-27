@@ -12,7 +12,7 @@ open Matrix
 @[simp]
 lemma controlM_conjTranspose : ∀ (M : CSquare n),
   (controlM M)ᴴ = controlM Mᴴ := by
-    intros M
+    intros
     ext i j
     rw [conjTranspose_apply]
     simp only [controlM]
@@ -27,7 +27,7 @@ lemma controlM_conjTranspose : ∀ (M : CSquare n),
 @[simp]
 lemma rotate_conjTranspose : ∀ θ φ δ,
   (rotate θ φ δ)ᴴ = rotate (-θ) (-δ) (-φ) := by
-    intros θ φ δ
+    intros
     simp only [rotate]
     ext i j
     rw [Matrix.conjTranspose_apply]
@@ -41,7 +41,7 @@ lemma rotate_conjTranspose : ∀ θ φ δ,
 
 @[simp]
 lemma phaseShift_conjTranspose : ∀ θ, (phaseShift θ)ᴴ = phaseShift (-θ) := by
-  intros θ
+  intros
   iterate 2 rw [←rotate_phaseShift]
   rw [rotate_conjTranspose]
   simp [rotate]

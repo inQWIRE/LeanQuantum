@@ -3,5 +3,7 @@ import Quantumlib.Data.Basis.Equivs
 import Quantumlib.Data.Gate.Basic
 import Quantumlib.Data.Gate.Equivs
 import Quantumlib.Data.Gate.Pauli
+import Quantumlib.Data.Gate.Rotate
+import Quantumlib.Data.Gate.PhaseShift
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.Kron

@@ -10,10 +10,7 @@ open Matrix
 open Lean Elab Command in
 elab "make_hermitian " gates:ident+ : command => do
   for gate in gates do
-    let name :=
-      gate.getId.toString ++ "_isHermitian"
-      |> Name.mkStr1
-      |> mkIdent
+    let name := gate.getId.appendAfter "_isHermitian" |> mkIdent
     let decl ← `(
       @[simp]
       lemma $name : ($gate).IsHermitian := by

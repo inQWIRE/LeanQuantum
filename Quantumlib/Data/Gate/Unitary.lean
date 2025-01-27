@@ -44,25 +44,21 @@ lemma rotate_isUnitary : ∀ θ φ δ, (rotate θ φ δ).IsUnitary := by
       _ = _ := by simp
 
 lemma hadamard_isUnitary : hadamard.IsUnitary := by 
-  rw [←rotate_hadamard]
-  apply rotate_isUnitary
+  simp [←rotate_hadamard, rotate_isUnitary]
 
 lemma σx_isUnitary : σx.IsUnitary := by
-  rw [←rotate_σx]
-  apply rotate_isUnitary
+  simp [←rotate_σx, rotate_isUnitary]
 
 lemma σy_isUnitary : σy.IsUnitary := by
-  rw [←rotate_σy]
-  apply rotate_isUnitary
+  simp [←rotate_σy, rotate_isUnitary]
 
 lemma σz_isUnitary : σz.IsUnitary := by
-  rw [←rotate_σz]
-  apply rotate_isUnitary
+  simp [←rotate_σz, rotate_isUnitary]
+
 
 lemma phaseShift_isUnitary : ∀ φ, (phaseShift φ).IsUnitary := by
   intros φ
-  rw [←rotate_phaseShift φ]
-  apply rotate_isUnitary
+  simp [←rotate_phaseShift φ, rotate_isUnitary]
 
 lemma sGate_isUnitary : sGate.IsUnitary := by 
   apply phaseShift_isUnitary

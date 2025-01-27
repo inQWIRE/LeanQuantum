@@ -1,6 +1,7 @@
 import Quantumlib.Data.Basis.Basic
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.Kron
+import Quantumlib.Tactic.Basic
 
 import Lean
 
@@ -89,16 +90,10 @@ def hmulUnexpander : Unexpander
   | _ => throw ()
 
 example : ∣01⟩ = ![0, 1, 0, 0] := by
-  ext i j
-  rw [kron_apply]
-  fin_cases i <;> 
-    simp [Fin.divNat, Fin.modNat]
+  solve_matrix
 
 example : ⟨10∣ = !![0, 0, 1, 0] := by
-  ext i j
-  rw [kron_apply]
-  fin_cases j
-    <;> simp [Fin.divNat, Fin.modNat]
+  solve_matrix
 
 notation "∣+⟩" => xbasisPlus
 notation "∣-⟩" => xbasisMinus
