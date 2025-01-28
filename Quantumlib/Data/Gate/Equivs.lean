@@ -150,17 +150,39 @@ lemma tGate_mul_tGate : tGate * tGate = sGate := by
   simp only [tGate, phaseShift_mul_phaseShift, sGate]
   ring_nf
 
-@[simp]
-lemma σx_mul_σx : σx * σx = 1 := by
-  solve_matrix [σx]
+section Paulis
+open Lean Elab Command
 
-@[simp]
-lemma σy_mul_σy : σy * σy = 1 := by
-  solve_matrix [σy]
+private def pauliProd : Name → Name → CommandElabM Syntax
+  | `σx, `σx => `(1)
+  | `σy, `σy => `(1)
+  | `σz, `σz => `(1)
+  | `σx, `σy => `( Complex.I • σz)
+  | `σy, `σz => `( Complex.I • σx)
+  | `σz, `σx => `( Complex.I • σy)
+  | `σy, `σx => `(-Complex.I • σz)
+  | `σz, `σy => `(-Complex.I • σx)
+  | `σx, `σz => `(-Complex.I • σy)
+  |  a, b    => panic! s!"Unexpected combination {a}, {b}"
 
-@[simp]
-lemma σz_mul_σz : σz * σz = 1 := by
-  solve_matrix [σz]
+elab "make_pauli_mul_table" : command => do
+  let paulis := [`σx, `σy, `σz]
+
+  for (a, b) in paulis.product paulis do
+    let name := s!"{a}_mul_{b}" |> Name.mkStr1 |> mkIdent
+    let res ← pauliProd a b
+    let decl ← `(
+      @[simp]
+      lemma $name : $(mkIdent a) * $(mkIdent b) = $(⟨res⟩) := by
+        try unfold σx 
+        try unfold σy 
+        try unfold σz 
+        solve_matrix
+    )
+    elabCommand decl
+
+end Paulis
+make_pauli_mul_table
 
 lemma controlM_def : ∀ (M : CSquare n),
   controlM M = ∣0⟩⟨0∣ ⊗ 1 + ∣1⟩⟨1∣ ⊗ M := by
