@@ -62,9 +62,61 @@ theorem one_kron_one :
   simp
 
 @[simp]
+theorem kron_one' :
+    A ⊗ (1 : CMatrix 1 1) = reindex (finCongr <| Nat.mul_one ..).symm (finCongr <| Nat.mul_one ..).symm A := by
+  simp [kron_def]
+  ext i j
+  simp
+  generalize h : (1 : CMatrix 1 1) (i.divNat, i.modNat).2 (j.divNat, j.modNat).2 = lhs
+  have : lhs = 1 := by
+    rw [←h,
+        show (i.divNat, i.modNat).2 = i.modNat by rfl,
+        show (j.divNat, j.modNat).2 = j.modNat by rfl,
+    ]
+    generalize hi : i.modNat = iModNat
+    generalize hj : j.modNat = jModNat
+    fin_cases iModNat; fin_cases jModNat
+    rfl
+  rw [this, mul_one]
+  clear h lhs this
+  simp only [Fin.divNat, Nat.div_one]
+  rfl
+
+@[simp]
 theorem kron_one :
     A ⊗ (1 : CMatrix n n) = reindex finProdFinEquiv finProdFinEquiv (blockDiagonal fun _ => A) := by
   rw [kron_def, kronecker_one]
+
+@[simp]
+theorem one'_kron :
+    (1 : CMatrix 1 1) ⊗ (A : CMatrix m n) = reindex (finCongr <| Nat.one_mul ..).symm (finCongr <| Nat.one_mul ..).symm A := by
+  simp [kron_def]
+  ext i j
+  simp
+  generalize h : (1 : CMatrix 1 1) (i.divNat, i.modNat).1 (j.divNat, j.modNat).1 = lhs
+  have : lhs = 1 := by
+    rw [←h,
+        show (i.divNat, i.modNat).1 = i.divNat by rfl,
+        show (j.divNat, j.modNat).1 = j.divNat by rfl,
+    ]
+    generalize hi : i.divNat = iDivNat
+    generalize hj : j.divNat = jDivNat
+    fin_cases iDivNat; fin_cases jDivNat
+    rfl
+  rw [this, one_mul]
+  clear h lhs this
+  congr <;> simp [Fin.modNat]
+  · have : ↑i < m := by omega
+    conv in ↑i % m =>
+      rw [Nat.mod_eq_of_lt this]
+      rfl
+    simp [Fin.cast]
+  · have : ↑j < n := by omega
+    conv in ↑j % n =>
+      rw [Nat.mod_eq_of_lt this]
+      rfl
+    simp [Fin.cast]
+
 
 @[simp]
 theorem one_kron (B : CMatrix m n) :

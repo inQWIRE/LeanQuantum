@@ -12,7 +12,7 @@ open Matrix Kron
 
 @[simp]
 lemma hadamardK_1 : hadamardK 1 = hadamard := by
-  solve_matrix [hadamardK]
+  simp [hadamardK]
 
 @[simp]
 lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
@@ -302,6 +302,5 @@ lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := b
 
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by
-  simp only [swap, cons_mul]
-  solve_matrix
+  solve_matrix [swap, Finset.sum]
 

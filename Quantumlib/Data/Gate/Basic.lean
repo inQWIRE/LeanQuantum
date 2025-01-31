@@ -1,6 +1,9 @@
 import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.Kron
+import Quantumlib.Data.Matrix.PowBitVec
 import Quantumlib.Data.Complex.Basic
+
+import Mathlib.Data.Vector.Basic
 
 open Matrix Kron
 
@@ -9,11 +12,7 @@ noncomputable def hadamard : CSquare 2 :=
              1, -1]
 
 noncomputable def hadamardK (k : ℕ) : CSquare (2 ^ k) := 
-  match k with
-  | 0 => 1
-  | .succ k' => by 
-    rw [Nat.pow_succ, Nat.mul_comm]
-    exact hadamard ⊗ hadamardK k'
+  hadamard ^ᵥ (List.Vector.replicate k true)
 
 noncomputable def sqrtx : CSquare 2 :=
   !![⟨1,  1⟩ / 2, ⟨1, -1⟩ / 2;
