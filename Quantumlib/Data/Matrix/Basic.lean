@@ -24,4 +24,4 @@ theorem pow_false [Fintype n] [DecidableEq n] [CommRing R] (M : Matrix n n R) :
 end Matrix
 
 def CMatrix.Commute     (A B : CMatrix n n) : Prop := _root_.Commute A B
-def CMatrix.AntiCommute (A B : CMatrix n n) : Prop := A * B = -1 • B * A
+def CMatrix.AntiCommute (A B : CMatrix n n) : Prop := A * B = -(B * A)

@@ -11,8 +11,8 @@ import Quantumlib.Tactic.Basic
 open Matrix Kron
 
 @[simp]
-lemma hadamardK_1 : hadamardK 1 = hadamard := by
-  simp [hadamardK]
+lemma hadamardK_one : hadamardK 1 = hadamard := by
+  simp [hadamardK, CMatrix.powBitVec]
 
 @[simp]
 lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
@@ -47,11 +47,11 @@ lemma sqrtx_decompose :
     <;> field_simp
 
 @[simp]
-lemma xRotate_pi : xRotate π = -Complex.I • σx := by
+lemma xRotate_π : xRotate π = -Complex.I • σx := by
   simp [xRotate, σx]
 
 @[simp]
-lemma yRotate_pi : yRotate π = -Complex.I • σy := by
+lemma yRotate_π : yRotate π = -Complex.I • σy := by
   simp [yRotate, σy]
 
 @[simp]
@@ -101,11 +101,11 @@ lemma rotate_phaseShift : ∀ θ,
   rotate 0 0 θ = phaseShift θ := by
   simp [rotate, phaseShift]
 
-lemma rotate_1 : rotate 0 0 0 = 1 := by
+lemma rotate_one : rotate 0 0 0 = 1 := by
   solve_matrix [rotate]
 
 @[simp]
-lemma phaseShift_0 : phaseShift 0 = 1 := by
+lemma phaseShift_zero : phaseShift 0 = 1 := by
   solve_matrix [phaseShift]
 
 @[simp]
@@ -117,7 +117,7 @@ lemma phaseShift_2π : phaseShift (2 * π) = 1 := by
   solve_matrix [phaseShift]
 
 @[simp]
-lemma phaseShift_neg_pi : phaseShift (-π) = σz := by
+lemma phaseShift_neg_π : phaseShift (-π) = σz := by
   simp [phaseShift, σz]
   ext i j
   fin_cases i <;> fin_cases j <;> simp
@@ -283,7 +283,7 @@ lemma controlM_mul_controlM : ∀ (M₁ M₂ : CSquare n),
     simp [-ketbra0_def, -ketbra1_def]
 
 @[simp]
-lemma controlM_1 : controlM (1 : CSquare n) = 1 := by
+lemma controlM_one : controlM (1 : CSquare n) = 1 := by
   rw [controlM_def, ←add_kron,
       ketbra0_plus_ketbra1,
       one_kron_one]

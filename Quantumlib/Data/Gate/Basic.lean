@@ -12,7 +12,7 @@ noncomputable def hadamard : CSquare 2 :=
              1, -1]
 
 noncomputable def hadamardK (k : ℕ) : CSquare (2 ^ k) := 
-  hadamard ^ᵥ (List.Vector.replicate k true)
+  hadamard ^ᵥ BitVec.allOnes k
 
 noncomputable def sqrtx : CSquare 2 :=
   !![⟨1,  1⟩ / 2, ⟨1, -1⟩ / 2;
