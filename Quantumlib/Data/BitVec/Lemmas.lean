@@ -99,7 +99,7 @@ theorem weight_and_le (x y : BitVec w) :
         <;> simp [ih, Nat.le_step]
 
 
-def getElem_eq_msb (x : BitVec (w + 1)) : x[w] = x.msb := by
+theorem getElem_eq_msb (x : BitVec (w + 1)) : x[w] = x.msb := by
   simp [BitVec.msb, ←getLsbD_eq_getElem, BitVec.getLsbD_eq_getMsbD]
 
 end BitVec

@@ -23,12 +23,10 @@ theorem sin_pi_div_four : Complex.sin (π / 4) = √2 / 2 := by
 
 @[simp]
 theorem exp_three_pi_div_two : Complex.exp (3 * ↑π / 2 * Complex.I) = -Complex.I := by
-  have : (3 : ℂ) = 2 + 1 := by ring_nf
   rw [show (3 : ℂ) = 2 + 1 by ring_nf, 
       add_mul, add_div, add_mul,
       exp_add]
-  repeat rw [exp_mul_I]
-  field_simp
+  simp [exp_mul_I]
 
 @[simp]
 theorem one_ne_neg_one : (1 : ℂ) ≠ -1 := by
