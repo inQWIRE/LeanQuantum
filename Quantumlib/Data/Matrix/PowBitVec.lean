@@ -14,7 +14,7 @@ def powBitVec (self : CMatrix m m) (x : BitVec n) : CMatrix (m ^ n) (m ^ n) :=
         (finCongr <| by ring)
         (finCongr <| by ring) <|
           (self ^ x.msb.toNat) ⊗
-          (powBitVec self x.tail : CMatrix (m ^ n') (m ^ n'))
+          (powBitVec self x.lsbs : CMatrix (m ^ n') (m ^ n'))
 
 infix:80 " ^ᵥ " => powBitVec
 
@@ -28,7 +28,7 @@ theorem powBitVec_zero (M : CMatrix n n) m :
       simp_rw [
         powBitVec,
         BitVec.msb_zero,
-        BitVec.tail_zero,
+        BitVec.lsbs_zero,
         ih,
         Bool.toNat_false, pow_zero,
         Matrix.one_kron_one]
@@ -44,8 +44,7 @@ theorem one_powBitVec :
       simp_rw [
         powBitVec,
         ih]
-      cases x.msb <;>
-        simp [-Matrix.one_kron, -Matrix.kron_one]
+      cases x.msb <;> simp
 
 
 @[simp]
@@ -60,7 +59,18 @@ theorem powBitVec_mul_powBitVec (A B : CMatrix n n) {m} (x : BitVec m) :
       simp_rw [powBitVec, ←ih]
       cases x.msb
         <;> ext i j
-        <;> simp [-Matrix.one_kron, ←Matrix.mul_kron_mul]
+        <;> simp [←Matrix.mul_kron_mul]
+
+open Kron in
+@[simp]
+theorem powBitVec_cons (A : CMatrix n n) b (x : BitVec m) :
+  A ^ᵥ (BitVec.cons b x) = 
+    Matrix.reindex
+      (finCongr <| by ring_nf)
+      (finCongr <| by ring_nf)
+        ((A ^ b.toNat) ⊗ 
+         (A ^ᵥ x : CMatrix (n ^ m) (n ^ m))) := by 
+      simp [powBitVec]
 
 end CMatrix
 

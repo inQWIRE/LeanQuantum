@@ -56,6 +56,17 @@ theorem kron_smul (r : ℂ)
   rfl
 
 @[simp]
+theorem kron_neg
+  (A : CMatrix l m) (B : CMatrix n p) : A ⊗ (-B) = -(A ⊗ B) := by
+    rw [←neg_one_smul ℂ, kron_smul, neg_one_smul]
+
+@[simp]
+theorem neg_kron
+  (A : CMatrix l m) (B : CMatrix n p) : (-A) ⊗ B = -(A ⊗ B) := by
+    rw [←neg_one_smul ℂ, smul_kron, neg_one_smul]
+
+
+@[simp]
 theorem one_kron_one :
     (1 : CMatrix m m) ⊗ (1 : CMatrix n n) = 1 := by
   rw [kron_def, one_kronecker_one]
@@ -82,7 +93,6 @@ theorem kron_one' :
   simp only [Fin.divNat, Nat.div_one]
   rfl
 
-@[simp]
 theorem kron_one :
     A ⊗ (1 : CMatrix n n) = reindex finProdFinEquiv finProdFinEquiv (blockDiagonal fun _ => A) := by
   rw [kron_def, kronecker_one]
@@ -118,7 +128,6 @@ theorem one'_kron :
     simp [Fin.cast]
 
 
-@[simp]
 theorem one_kron (B : CMatrix m n) :
     (1 : CMatrix l l) ⊗ B =
       reindex ((Equiv.prodComm ..).trans finProdFinEquiv) ((Equiv.prodComm ..).trans finProdFinEquiv)
@@ -127,7 +136,6 @@ theorem one_kron (B : CMatrix m n) :
   rfl
   
 
-@[simp]
 theorem mul_kron_mul (A : CMatrix l m)
     (B : CMatrix m n) (A' : CMatrix l' m') (B' : CMatrix m' n') :
     (A * B) ⊗ (A' * B') = A ⊗ A' * B ⊗ B' := by

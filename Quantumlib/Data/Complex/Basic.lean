@@ -30,4 +30,12 @@ theorem exp_three_pi_div_two : Complex.exp (3 * ↑π / 2 * Complex.I) = -Comple
   repeat rw [exp_mul_I]
   field_simp
 
+@[simp]
+theorem one_ne_neg_one : (1 : ℂ) ≠ -1 := by
+  intros h
+  rw [Complex.ext_iff] at h
+  simp_all
+  linarith
+
+
 end Complex

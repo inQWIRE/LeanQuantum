@@ -1,9 +1,6 @@
-import Mathlib.Tactic.Linarith
-import Mathlib.Tactic.FieldSimp
-
 namespace BitVec
 
-def tail (x : BitVec (w + 1)) : BitVec w := x.setWidth w
+def lsbs (x : BitVec (w + 1)) : BitVec w := x.setWidth w
 
 def foldr (x : BitVec w) (f : Bool → α → α) (init : α) : α := 
   w.fold (fun i h acc => f x[i] acc) init

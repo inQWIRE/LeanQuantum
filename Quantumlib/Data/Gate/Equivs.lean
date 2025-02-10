@@ -174,9 +174,9 @@ elab "make_pauli_mul_table" : command => do
     let decl ← `(
       @[simp]
       lemma $name : $(mkIdent a) * $(mkIdent b) = $(⟨res⟩) := by
-        try unfold σx 
-        try unfold σy 
-        try unfold σz 
+        try unfold σx
+        try unfold σy
+        try unfold σz
         solve_matrix
     )
     elabCommand decl
@@ -251,18 +251,19 @@ lemma controlM_def : ∀ (M : CSquare n),
         simp [this]
       · rename_i hxney
         have : x.divNat = 0 := by
-          simp [Fin.divNat]
+          simp only [Fin.divNat, Fin.isValue]
           conv in ↑x / n =>
             rw [Nat.div_eq_of_lt h]
             rfl
           rfl
-        simp_all [this]
+        simp only [this, Fin.isValue, cons_val_zero]
+
         generalize hyDiv : y.divNat = yDiv
         fin_cases yDiv <;> simp
-        rw [if_neg]
+        rw [Matrix.one_apply, if_neg]
         intros contra
-        simp [Fin.divNat] at hyDiv
-        simp [Fin.modNat] at contra
+        simp only [Fin.divNat, Fin.zero_eta, Fin.isValue] at hyDiv
+        simp only [Fin.modNat, Fin.mk.injEq] at contra
         apply hxney
         have : ↑y < n := by
           apply Nat.lt_of_div_eq_zero hngt0
@@ -275,12 +276,10 @@ lemma controlM_def : ∀ (M : CSquare n),
 @[simp]
 lemma controlM_mul_controlM : ∀ (M₁ M₂ : CSquare n),
   controlM M₁ * controlM M₂ = controlM (M₁ * M₂) := by
-    intros
-    repeat rw [controlM_def]
-    repeat rw [mul_add]
-    repeat rw [add_mul]
-    repeat rw [←mul_kron_mul]
-    simp [-ketbra0_def, -ketbra1_def]
+    simp [
+      controlM_def, mul_add, add_mul,
+      ←mul_kron_mul, -ketbra0_def, -ketbra1_def
+    ]
 
 @[simp]
 lemma controlM_one : controlM (1 : CSquare n) = 1 := by
@@ -294,11 +293,11 @@ lemma controlM_σx : controlM σx = cnot := by
 
 @[simp]
 lemma cnot_decompose : ∣1⟩⟨1∣ ⊗ σx + ∣0⟩⟨0∣ ⊗ 1 = cnot := by
-  solve_matrix [cnot, σx]
+  solve_matrix [cnot, σx, kron_one]
 
 @[simp]
 lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := by
-  solve_matrix [notc, σx]
+  solve_matrix [notc, σx, one_kron]
 
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by
