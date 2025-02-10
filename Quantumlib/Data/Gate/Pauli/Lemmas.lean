@@ -331,7 +331,6 @@ theorem mul_toCMatrix'_eq_toCMatrix'_mul_toCMatrix' (P Q : Pauli n) :
     | zero => 
       obtain hP | hP := of_length_zero P
         <;> obtain hQ | hQ := of_length_zero Q
-        <;> subst_eqs
         <;> simp_all [toCMatrix', phaseFlipsWith]
     | succ n' ih =>
       conv_rhs =>
