@@ -200,10 +200,7 @@ lemma controlM_def : ∀ (M : CSquare n),
       subst right
       have : x.divNat = 0 := by
         simp [Fin.divNat]
-        conv in ↑x / n =>
-          rw [Nat.div_eq_of_lt left]
-          rfl
-        rfl
+        right; assumption
       simp [this]
     next h hxy =>
       simp_all [blockDiagonal]
@@ -215,7 +212,6 @@ lemma controlM_def : ∀ (M : CSquare n),
               Nat.div_eq_of_lt hysubn,
               zero_add]
           rfl
-        rfl
       rw [this]
       have : x.divNat = 1 := by
         simp [Fin.divNat]
@@ -224,7 +220,6 @@ lemma controlM_def : ∀ (M : CSquare n),
               Nat.div_eq_of_lt hxsubn,
               zero_add]
           rfl
-        rfl
       simp [this, Fin.modNat, Fin.subNat]
       congr <;>
         rwa [Nat.mod_eq, if_pos (by omega),
@@ -234,20 +229,16 @@ lemma controlM_def : ∀ (M : CSquare n),
       cases h : decide (x < n) <;> simp_all
       · rename' hxy => hy, h => hx
         have : y.divNat = 0 := by
-          simp [Fin.divNat]
-          conv in ↑y / n =>
-            rw [Nat.div_eq_of_lt hy]
-            rfl
-          rfl
+          simp only [Fin.divNat, Fin.isValue, Fin.mk_eq_zero, Nat.div_eq_zero_iff]
+          right; assumption
         rw [this]
         have : x.divNat = 1 := by
-          simp [Fin.divNat]
+          simp only [Fin.divNat, Fin.isValue, Fin.mk_eq_one]
           conv in ↑x / n =>
             rw [Nat.div_eq_sub_div hngt0 hx,
                 Nat.div_eq_of_lt hxsubn,
                 zero_add]
             rfl
-          rfl
         simp [this]
       · rename_i hxney
         have : x.divNat = 0 := by

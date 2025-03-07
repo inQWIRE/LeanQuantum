@@ -1,9 +1,15 @@
 import Quantumlib.Data.BitVec.Basic
 
+import Mathlib.Data.BitVec
+import Mathlib.Data.Fintype.Basic
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Ring
 
+
 namespace BitVec
+
+instance : Fintype (BitVec w) :=
+  Fintype.ofEquiv (Fin (2 ^ w)) equivFin.toEquiv.symm
 
 theorem cons_msb_lsbs (x : BitVec (w + 1)) :
   cons x.msb (lsbs x) = x := by simp [lsbs]
@@ -35,10 +41,7 @@ theorem lsbs_and (x y : BitVec (w + 1)) :
 theorem cons_true_allOnes :
   cons true (allOnes m) = allOnes (m + 1) := by
     ext
-    simp only [getLsbD_cons, getLsbD_allOnes, Bool.if_true_left]
-    rename ℕ => i
-    cases h : decide (i = m) <;> simp_all
-    omega
+    simp [getElem_cons, getElem_allOnes, Bool.if_true_left]
 
 @[simp]
 theorem lsbs_allOnes :
@@ -69,9 +72,8 @@ theorem weight_cons_true (x : BitVec w) : (BitVec.cons true x).weight = x.weight
     rfl
   rw [add_comm]
   congr
-  ext i h acc
-  rw [getElem_cons, if_neg (by omega)]
-  rfl
+  ext
+  rw [getElem_cons, dif_neg (by omega)]
 
 @[simp]
 theorem weight_cons_false (x : BitVec w) : (BitVec.cons false x).weight = x.weight := by
@@ -84,8 +86,7 @@ theorem weight_cons_false (x : BitVec w) : (BitVec.cons false x).weight = x.weig
   rw [zero_add]
   congr
   ext i h acc
-  rw [getElem_cons, if_neg (by omega)]
-  rfl
+  rw [getElem_cons, dif_neg (by omega)]
 
 theorem weight_and_le (x y : BitVec w) :
   (x &&& y).weight ≤ x.weight := by
