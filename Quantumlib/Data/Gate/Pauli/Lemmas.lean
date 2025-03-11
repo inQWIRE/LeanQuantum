@@ -237,9 +237,8 @@ theorem one_def : (1 : PauliMap n) = Finsupp.single 1 1 := rfl
 theorem mul_def (pm qm : PauliMap n) :
   pm * qm = 
   pm.sum (fun P c₁ => qm.sum (fun Q c₂ =>
-    let R := P * Q
     let neg := (-1) ^ (P.phaseFlipsWith Q).toNat
-    Finsupp.single R (c₁ * c₂ * neg)))
+    Finsupp.single (P * Q) (c₁ * c₂ * neg)))
  := rfl
 
 
@@ -258,7 +257,7 @@ example :
     ) =
   fun₀
     | 1 => (1 : ℂ) := by 
-      simp [mul_def, UPauli.X, UPauli.phaseFlipsWith]
+    simp [mul_def, UPauli.X, UPauli.phaseFlipsWith]
 
 example : 
   (fun₀ 
@@ -272,8 +271,9 @@ example :
     | 1 => (1 : ℂ) := by 
       simp [mul_def, Finsupp.sum, Finsupp.update, Finsupp.single]
       rw [@Finset.sum_insert, Finset.sum_singleton]
-      · simp [UPauli.phaseFlipsWith, UPauli.X]
-        simp [UPauli.one_def]
+      · simp [UPauli.phaseFlipsWith]
+        simp [UPauli.one_def, UPauli.X]
+
         ext P
         fin_cases P <;> simp [UPauli.equivProd, EquivLike.toEquiv]
       · simp [UPauli.one_def, UPauli.X]

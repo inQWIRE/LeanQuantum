@@ -3,8 +3,6 @@ import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Data.Matrix.PowBitVec
 import Quantumlib.Data.Complex.Basic
 
-import Mathlib.Data.Vector.Basic
-
 open Matrix Kron
 
 noncomputable def hadamard : CSquare 2 :=
