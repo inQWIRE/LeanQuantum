@@ -81,7 +81,7 @@ lemma rotate_σz : rotate 0 0 π = σz := by
 lemma rotate_xRotate : ∀ θ,
   rotate θ (3 * π / 2) (π / 2) = xRotate θ := by
   intros
-  simp [rotate, xRotate]
+  simp only [rotate, xRotate]
   rw [Complex.exp_mul_I]
   simp
   ext i j

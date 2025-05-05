@@ -35,5 +35,13 @@ theorem one_ne_neg_one : (1 : ℂ) ≠ -1 := by
   simp_all
   linarith
 
+theorem neg_I_pow_eq_pow_mod (n : ℕ) :
+  (-I) ^ n = (-I) ^ (n % 4) := by
+    rw [neg_pow, neg_pow Complex.I, ←Complex.I_pow_eq_pow_mod]
+    congr 1
+    simp [
+      show 4 = 2 * 2 by rfl, -Nat.reduceMul,
+      Nat.mod_mul, pow_add, pow_mul,
+      ←neg_one_pow_eq_pow_mod_two]
 
 end Complex
