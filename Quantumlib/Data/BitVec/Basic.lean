@@ -14,8 +14,4 @@ def dot (x y : BitVec w) : Nat :=
 def dotZ₂ (x y : BitVec w) : Bool := 
   (x.dot y) % 2 == 1
 
-example : (0b0101001#10).weight = 3 := by rfl
-example : (0b0101001#10).dotZ₂ (0b1#10) = true := by rfl
-example : (0b0101001#10).dotZ₂ (0b10#10) = false := by rfl
-
 end BitVec

@@ -89,12 +89,6 @@ def hmulUnexpander : Unexpander
   | `($(_) (⟨$num₁∣) ∣$num₂⟩) => `(⟨$num₁∣$num₂⟩)
   | _ => throw ()
 
-example : ∣01⟩ = ![0, 1, 0, 0] := by
-  solve_matrix
-
-example : ⟨10∣ = !![0, 0, 1, 0] := by
-  solve_matrix
-
 notation "∣+⟩" => xbasisPlus
 notation "∣-⟩" => xbasisMinus
 

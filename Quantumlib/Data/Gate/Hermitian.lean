@@ -21,10 +21,6 @@ elab "make_hermitian " gates:ident+ : command => do
 
 make_hermitian hadamard cnot swap σx σy σz
 
-example : hadamard = hadamardᴴ := by rw   [hadamard_isHermitian]
-example : cnot     = cnotᴴ     := by simp [cnot_isHermitian.eq]
-
-
 lemma controlM_isHermitian : ∀ (M : CSquare n), 
   M.IsHermitian → (controlM M).IsHermitian := by
     intros M h

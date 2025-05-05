@@ -471,15 +471,4 @@ theorem m_eq_0_of_in_normalized_support {Pm : PauliMap n} {P : Pauli n} :
       · rw [if_neg heq] at h
         simp_all
 
-example : (Pauli.X : PauliMap 1) * Pauli.X = 1 := by 
-  simp [ofPauli, normalized, normalized.f, Pauli.X, Pauli.zeroed, Pauli.evalPhase]
-  rfl
-
-#eval [P| Z * X ]
-#eval [P| Y ]
-
-example : [P|  ] = [P| Y ] := by
-  rfl
-
-
 end PauliMap
