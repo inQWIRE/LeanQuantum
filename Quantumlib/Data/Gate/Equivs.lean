@@ -8,7 +8,8 @@ import Quantumlib.Data.Matrix.Basic
 import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
-open Matrix Kron
+open Matrix hiding hadamard swap
+open Kron
 
 @[simp]
 lemma hadamardK_one : hadamardK 1 = hadamard := by
@@ -33,18 +34,19 @@ lemma sqrtx_mul_sqrtx : sqrtx * sqrtx = σx := by
   simp only [sqrtx, σx]
   ext i j
   fin_cases i <;> fin_cases j
-    <;> apply Complex.ext 
+    <;> field_simp
+    <;> apply Complex.ext
     <;> simp
-    <;> ring_nf
+    <;> ring
 
 lemma sqrtx_decompose :
   hadamard * phaseShift (π / 2) * hadamard = sqrtx := by
   simp_rw [sqrtx, hadamard, phaseShift, Complex.exp_mul_I]
   ext i j
   fin_cases i <;> fin_cases j
+    <;> field_simp
     <;> apply Complex.ext
     <;> simp
-    <;> field_simp
 
 @[simp]
 lemma xRotate_π : xRotate π = -Complex.I • σx := by
