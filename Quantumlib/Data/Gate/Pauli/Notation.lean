@@ -1,4 +1,7 @@
+import Lean
 import Quantumlib.Data.Gate.Pauli.Defs
+
+namespace Pauli
 
 declare_syntax_cat pauli
 syntax ident : pauli
@@ -8,7 +11,7 @@ syntax:55 pauli:55 " * " pauli:56 : pauli
 
 syntax " ( " pauli " ) " : pauli
 
-syntax "[P| " pauli "]" : term
+syntax "[P| " pauli " ]" : term
 
 def parse_ident (id : Lean.TSyntax `ident) := do
   let mut atoms := id.getId.toString
@@ -67,7 +70,7 @@ syntax pauli_map:30 " + " pauli_map:31 : pauli_map
 syntax pauli_map:50 " * " pauli_map:51 : pauli_map
 syntax "(" pauli_map ")" : pauli_map
 
-syntax "[PA| " pauli_map "]" : term
+syntax "[PA| " pauli_map " ]" : term
 
 macro_rules 
   | `( [PA| $p:pauli ] ) =>
@@ -82,21 +85,55 @@ macro_rules
       ``( [PA| $pa] )
 
 
-instance : Repr (Pauli n) where 
-  reprPrec P _ :=
-    let ys := P.z &&& P.x
-    let s := n.fold (fun i h acc => 
-      (if ys[i] then "Y"
-       else if P.z[i] then "Z"
-       else if P.x[i] then "X"
-       else "I") ++ acc
-    ) ""
-    let phase := 
-      match P.m - P.z.dot P.x with
-      | 0 => ""
-      | 1 => "-i"
-      | 2 => "-"
-      | 3 => "i"
-    phase ++ s
+private def getId (P : Pauli n) : String := 
+  let ys := P.z &&& P.x
+  let s := n.fold (fun i h acc => 
+    (if ys[i] then "Y"
+     else if P.z[i] then "Z"
+     else if P.x[i] then "X"
+     else "I") ++ acc
+  ) ""
+  if s.isEmpty then "0" else s
 
-#eval [P| XI * XX ]
+private def getPhase (P : Pauli n) : String :=
+  match P.m - P.z.dot P.x  with
+  | 0 => ""
+  | 1 => "-i"
+  | 2 => "-"
+  | 3 => "i"
+
+open Lean Elab PrettyPrinter Delaborator SubExpr Meta
+
+def formatPauli (P : Pauli n) : Format :=
+  Format.bracket "[P| " (.text (getId P ++ getPhase P)) " ]"
+
+instance : Repr (Pauli n) where 
+  reprPrec P _ := formatPauli P
+
+
+@[delab app.Pauli.mk]
+unsafe def delabPauli : Delab := do
+  let e ← getExpr 
+  let #[n, _, _, _] := e.getAppArgs | failure
+  let some n' ← (evalNat n).run
+    | failure
+  try 
+    let P ← Meta.evalExpr (Pauli n') (←mkAppM `Pauli #[n]) e
+    let mut Pid := getId P
+    let mut neg := false
+    match P.m - P.z.dot P.x with
+    | 0 => Pid := Pid  -- TODO: What's the do-notation NoOp?
+    | 1 => 
+      neg := true
+      Pid := "i" ++ Pid
+    | 2 => neg := true
+    | 3 => Pid := "i" ++ Pid 
+    let Pid' := mkIdent <| Name.mkSimple Pid
+    if neg then
+      `([P| -$(⟨Pid'⟩) ])
+    else
+      `([P| $(⟨Pid'⟩) ])
+  catch _ =>
+    failure
+
+end Pauli
