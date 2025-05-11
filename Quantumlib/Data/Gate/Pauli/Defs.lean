@@ -68,14 +68,26 @@ instance : Neg (Pauli n) := ⟨neg⟩
 
 def i : Pauli n → Pauli n := addPhase 3
 
+def phaseFlipCounts (P Q : Pauli n) : ℕ := 
+  2 * P.x.dot Q.z
+
 def mul (P Q : Pauli n) : Pauli n := 
   {
-    m := P.m + Q.m + 2 * (P.x.dot Q.z),
+    m := P.m + Q.m + phaseFlipCounts P Q,
     z := P.z ^^^ Q.z,
     x := P.x ^^^ Q.x,
   }
 
 instance : Mul (Pauli n) := ⟨mul⟩
+
+def kron {n m} (P : Pauli n) (Q : Pauli m) : Pauli (n + m) := 
+  {
+    m := P.m + Q.m,
+    z := P.z ++ Q.z,
+    x := P.x ++ Q.x
+  }
+
+scoped[Pauli] infixl:100 " ⊗ " => kron
 
 def evalPhase (P : Pauli n) : ℂ := 
   match P.m with
@@ -83,6 +95,9 @@ def evalPhase (P : Pauli n) : ℂ :=
   | 1 => -Complex.I
   | 2 => -1
   | 3 => Complex.I
+
+def commutesWith (P Q : Pauli n) : Bool := 
+  (phaseFlipCounts P Q : Fin 4) == phaseFlipCounts Q P
 
 def toCMatrix (P : Pauli n) : CMatrix (2 ^ n) (2 ^ n) :=
   match n with
