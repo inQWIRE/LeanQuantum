@@ -46,12 +46,12 @@ theorem cons_true_allOnes :
     simp [getElem_cons, getElem_allOnes, Bool.if_true_left]
 
 @[simp]
-theorem foldr_nil : foldr nil f a = a := by
-  simp [foldr]
+theorem foldl_nil : foldl nil f a = a := by
+  simp [foldl]
 
 @[simp]
-theorem foldr_cons {x : BitVec w} : foldr (cons b x) f a = f b (foldr x f a) := by
-  simp only [foldr, getElem_cons, Nat.fold_succ, ↓reduceDIte]
+theorem foldl_cons {x : BitVec w} : foldl (cons b x) f a = f b (foldl x f a) := by
+  simp only [foldl, getElem_cons, Nat.fold_succ, ↓reduceDIte]
   congr
   ext
   rw [dif_neg (by omega)]
@@ -66,13 +66,13 @@ theorem lsbs_allOnes :
 @[simp]
 theorem weight_zero : 
   (0#m).weight = 0 := by
-    simp [weight, foldr]
+    simp [weight, foldl]
     induction m <;> simp_all
 
 @[simp]
 theorem weight_allOnes : 
   (allOnes m).weight = m := by
-    simp [weight, foldr]
+    simp [weight, foldl]
     induction m <;> simp_all [add_comm]
 
 @[simp]
@@ -135,7 +135,7 @@ theorem dot_comm (x y : BitVec w) : x.dot y = y.dot x := by
 
 theorem cons_dot_cons (x y : BitVec w) :
   (cons a x).dot (cons b y) = ((a && b).toNat + x.dot y) := by
-    simp [dot, foldr_cons]
+    simp [dot, foldl_cons]
 
 @[simp]
 theorem zero_dot : (0#m).dot x = 0 := by

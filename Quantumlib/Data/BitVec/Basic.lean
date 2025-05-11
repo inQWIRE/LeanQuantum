@@ -1,12 +1,14 @@
+import Mathlib
+
 namespace BitVec
 
 def lsbs (x : BitVec (w + 1)) : BitVec w := x.setWidth w
 
-def foldr (x : BitVec w) (f : Bool → α → α) (init : α) : α := 
+def foldl (x : BitVec w) (f : Bool → α → α) (init : α) : α := 
   w.fold (fun i h acc => f x[i] acc) init
 
 def weight (x : BitVec w) : Nat :=
-  x.foldr (·.toNat + ·) 0
+  x.foldl (·.toNat + ·) 0
 
 def dot (x y : BitVec w) : Nat :=
   (x &&& y).weight
