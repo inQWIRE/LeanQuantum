@@ -316,19 +316,21 @@ theorem inv_x (P : Pauli n) : P⁻¹.x = P.x := by
   simp [(·⁻¹)]
 
 @[simp]
-theorem inv_m (P : Pauli n) : P⁻¹.m = P.m - (2 * (P.m + P.x.dot P.z)) := by
-  simp [(·⁻¹), Fin.sub_def, Fin.neg_def, Fin.add_def, add_comm]
+theorem inv_m (P : Pauli n) : P⁻¹.m = -(P.m + P.phaseFlipCounts P) := by
+  simp only [(·⁻¹), phaseFlipCounts, addPhase]
+  ring_nf
+  norm_cast
 
 theorem mul_inv (P Q : Pauli n) :
   P * Q⁻¹ = (P * Q).addPhase (-(2 * (Q.m + (Q.x.dot Q.z)))) := by
-    simp only [mul_def, inv_m, Fin.isValue, inv_z, add_assoc, inv_x, addPhase_lit, Fin.add_neg,
-      mk.injEq, add_right_inj, and_self, and_true]
+    simp only [mul_def, inv_m, phaseFlipCounts, Nat.cast_mul, Nat.cast_ofNat, Fin.isValue,
+      neg_add_rev, Fin.add_neg, inv_z, inv_x, addPhase_lit, mk.injEq, and_self, and_true]
     ring
 
 theorem inv_mul (P Q : Pauli n) :
   P⁻¹ * Q = (P * Q).addPhase (-(2 * (P.m + (P.x.dot P.z)))) := by
-    simp only [mul_def, inv_m, Fin.isValue, inv_x, inv_z, addPhase_lit, Fin.add_neg, mk.injEq,
-      and_self, and_true]
+    simp only [mul_def, inv_m, phaseFlipCounts, Nat.cast_mul, Nat.cast_ofNat, Fin.isValue,
+      neg_add_rev, Fin.add_neg, inv_x, inv_z, addPhase_lit, mk.injEq, and_self, and_true]
     ring
 
 theorem commutesWith_comm (P Q : Pauli n) : P.commutesWith Q ↔ Q.commutesWith P := by
