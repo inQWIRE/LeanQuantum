@@ -1,6 +1,7 @@
 import Quantumlib.Basic
 
-open Matrix Kron
+open Matrix hiding hadamard swap
+open Kron
 
 @[simp]
 lemma σx_mul_ket0 : σx * ∣0⟩ = ∣1⟩ := by
