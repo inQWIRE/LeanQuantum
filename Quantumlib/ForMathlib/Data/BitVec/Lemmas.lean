@@ -93,7 +93,7 @@ theorem weight_and_le (x y : BitVec w) :
       rw [←cons_msb_lsbs x, ←cons_msb_lsbs y] 
       simp only [cons_and_cons]
       cases x.msb <;> cases y.msb
-        <;> simp [ih, Nat.le_step, add_comm]
+        <;> simp [ih, Nat.le_succ_of_le, add_comm]
 
 theorem weight_or (x y : BitVec w) :
   (x ||| y).weight = x.weight + y.weight - (x &&& y).weight := by

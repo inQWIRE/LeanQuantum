@@ -43,18 +43,18 @@ lemma sqrtx_mul_sqrtx : sqrtx * sqrtx = σx := by
 
 lemma sqrtx_decompose :
   hadamard * phaseShift (π / 2) * hadamard = sqrtx := by
-  simp only [hadamard, Real.sqrt_inv, smul_of, smul_cons, Complex.real_smul, Complex.ofReal_inv,
-    mul_one, smul_empty, smul_neg, phaseShift, Complex.ofReal_div, Complex.ofReal_ofNat,
-    Complex.exp_pi_div_two_mul_I, cons_mul, Nat.succ_eq_add_one, Nat.reduceAdd, vecMul_cons,
-    head_cons, smul_eq_mul, mul_zero, tail_cons, empty_vecMul, add_zero, add_cons, zero_add,
-    empty_add_empty, neg_smul, neg_cons, neg_zero, neg_empty, empty_mul, Equiv.symm_apply_apply,
-    mul_neg, neg_neg, sqrtx, EmbeddingLike.apply_eq_iff_eq, vecCons_inj, and_true]
-  field_simp
-  norm_cast
-  norm_num
-  field_simp
-  simp only [true_and, and_true, and_self]
-  ring
+    simp only [hadamard, Real.sqrt_inv, smul_of, smul_cons, Complex.real_smul, Complex.ofReal_inv,
+      mul_one, smul_empty, smul_neg, phaseShift, Complex.ofReal_div, Complex.ofReal_ofNat,
+      Complex.exp_pi_div_two_mul_I, cons_mul, Nat.succ_eq_add_one, Nat.reduceAdd, vecMul_cons,
+      head_cons, smul_eq_mul, mul_zero, tail_cons, empty_vecMul, add_zero, add_cons, zero_add,
+      empty_add_empty, neg_smul, neg_cons, neg_zero, neg_empty, empty_mul, Equiv.symm_apply_apply,
+      mul_neg, neg_neg, sqrtx, EmbeddingLike.apply_eq_iff_eq, vecCons_inj, and_true]
+    field_simp
+    norm_cast
+    norm_num
+    field_simp
+    simp only [true_and, and_true, and_self]
+    ring
 
 
 
@@ -74,8 +74,6 @@ lemma rotate_hadamard : rotate (π / 2) 0 π = hadamard := by
   fin_cases i <;> fin_cases j
     <;> simp [div_div, this,
               Real.sqrt_div_self]
-
-  
 
 @[simp]
 lemma rotate_σx : rotate π 0 π = σx := by
