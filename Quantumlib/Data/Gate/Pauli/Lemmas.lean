@@ -1,6 +1,6 @@
-import Quantumlib.Data.Fin
 import Quantumlib.Data.Gate.Equivs
 import Quantumlib.Data.Gate.Pauli.Defs
+import Quantumlib.ForMathlib.Data.Fin
 
 open Kron
 
@@ -53,15 +53,13 @@ theorem neg_eq {P : Pauli n} : -P = P.addPhase 2 := by rfl
 
 theorem mul_def (P Q : Pauli n) : P * Q = 
   {
-    m := P.m + Q.m + 2 * (P.x.dot Q.z),
+    m := P.m + Q.m + phaseFlipCount P Q,
     z := P.z ^^^ Q.z,
     x := P.x ^^^ Q.x,
   }
  := by
   conv_lhs =>
     tactic => simp_rw [(· * ·), Mul.mul, Pauli.mul]
-    unfold phaseFlipCounts
-  simp
 
 theorem cons_msb_tail (P : Pauli (n + 1)) :
   P = cons P.z.msb P.x.msb P.tail  := by 
@@ -128,8 +126,13 @@ lemma one_m : (1 : Pauli n).m = 0 := by
   simp [one_def]
 
 @[simp]
+theorem cons_phaseFlipCount_cons (P Q : Pauli n) :
+  phaseFlipCount (cons a b P) (cons c d Q) = (Fin.ofNat 4 (2 * (b && c)).toNat) + phaseFlipCount P Q := by
+    simp [phaseFlipCount, BitVec.cons_dot_cons, mul_add]
+
+@[simp]
 theorem cons_mul_cons (P Q : Pauli n) : cons a b P * cons c d Q =
-  addPhase (2 * (b && c).toNat) (cons (a ^^ c) (b ^^ d) (P * Q)) := by 
+  addPhase (Fin.ofNat 4 (2 * (b && c).toNat)) (cons (a ^^ c) (b ^^ d) (P * Q)) := by 
     simp only [mul_def, cons_m, Fin.isValue, cons_z, cons_x, BitVec.cons_dot_cons, Nat.cast_add,
       BitVec.cons_xor_cons, addPhase, mk.injEq, and_self, and_true]
     ring

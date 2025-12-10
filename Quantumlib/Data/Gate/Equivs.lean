@@ -4,8 +4,6 @@ import Quantumlib.Data.Gate.Basic
 import Quantumlib.Data.Gate.Pauli
 import Quantumlib.Data.Gate.PhaseShift
 import Quantumlib.Data.Gate.Rotate
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
 open Matrix hiding hadamard swap
@@ -18,12 +16,16 @@ lemma hadamardK_one : hadamardK 1 = hadamard := by
 @[simp]
 lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
   simp only [hadamard]
-  ext i j
-  fin_cases i <;> fin_cases j
-    <;> field_simp
-    <;> apply Complex.ext
-    <;> simp
-    <;> ring_nf
+  have h_mat : !![(1 : ℂ), 1; 1, -1] * !![1, 1; 1, -1] = !![2, 0; 0, 2] := by
+    solve_matrix
+  have h_scal : (√2⁻¹ : ℝ) * (√2⁻¹) = 1/2 := by
+    rw [←Real.sqrt_mul (by norm_num)]
+    norm_num
+
+  simp_rw [Matrix.smul_mul, Matrix.mul_smul, smul_smul,
+    h_mat, h_scal]
+
+  solve_matrix
 
 @[simp]
 lemma hadamard_transpose : hadamardᵀ = hadamard := by
@@ -31,26 +33,34 @@ lemma hadamard_transpose : hadamardᵀ = hadamard := by
 
 @[simp]
 lemma sqrtx_mul_sqrtx : sqrtx * sqrtx = σx := by
-  simp only [sqrtx, σx]
-  ext i j
-  fin_cases i <;> fin_cases j
-    <;> field_simp
-    <;> apply Complex.ext
-    <;> simp
-    <;> ring
+  simp only [sqrtx, cons_mul, Nat.succ_eq_add_one, Nat.reduceAdd, vecMul_cons, head_cons, smul_cons,
+    smul_eq_mul, smul_empty, tail_cons, empty_vecMul, add_zero, add_cons, empty_add_empty,
+    empty_mul, Equiv.symm_apply_apply, σx, EmbeddingLike.apply_eq_iff_eq, vecCons_inj, and_true]
+  ring_nf
+  norm_num [Complex.I_sq]
+
+
 
 lemma sqrtx_decompose :
   hadamard * phaseShift (π / 2) * hadamard = sqrtx := by
-  simp_rw [sqrtx, hadamard, phaseShift, Complex.exp_mul_I]
-  ext i j
-  fin_cases i <;> fin_cases j
-    <;> field_simp
-    <;> apply Complex.ext
-    <;> simp
+  simp only [hadamard, Real.sqrt_inv, smul_of, smul_cons, Complex.real_smul, Complex.ofReal_inv,
+    mul_one, smul_empty, smul_neg, phaseShift, Complex.ofReal_div, Complex.ofReal_ofNat,
+    Complex.exp_pi_div_two_mul_I, cons_mul, Nat.succ_eq_add_one, Nat.reduceAdd, vecMul_cons,
+    head_cons, smul_eq_mul, mul_zero, tail_cons, empty_vecMul, add_zero, add_cons, zero_add,
+    empty_add_empty, neg_smul, neg_cons, neg_zero, neg_empty, empty_mul, Equiv.symm_apply_apply,
+    mul_neg, neg_neg, sqrtx, EmbeddingLike.apply_eq_iff_eq, vecCons_inj, and_true]
+  field_simp
+  norm_cast
+  norm_num
+  field_simp
+  simp only [true_and, and_true, and_self]
+  ring
+
+
 
 @[simp]
 lemma xRotate_π : xRotate π = -Complex.I • σx := by
-  simp [xRotate, σx]
+  solve_matrix [xRotate, σx]
 
 @[simp]
 lemma yRotate_π : yRotate π = -Complex.I • σy := by
@@ -58,18 +68,19 @@ lemma yRotate_π : yRotate π = -Complex.I • σy := by
 
 @[simp]
 lemma rotate_hadamard : rotate (π / 2) 0 π = hadamard := by
-  simp [rotate, hadamard]
-  ring_nf
-  rw [mul_one_div]
+  simp only [rotate, hadamard]
   ext i j
+  have : (2 : ℝ) * 2 = 4 := by ring
   fin_cases i <;> fin_cases j
-    <;> apply Complex.ext
-    <;> simp
+    <;> simp [div_div, this,
+              Real.sqrt_div_self]
+
+  
 
 @[simp]
 lemma rotate_σx : rotate π 0 π = σx := by
   simp [rotate, σx]
-  
+
 @[simp]
 lemma rotate_σy : rotate π (π / 2) (π / 2) = σy := by
   simp only [rotate, σy]
@@ -78,21 +89,13 @@ lemma rotate_σy : rotate π (π / 2) (π / 2) = σy := by
 
 @[simp]
 lemma rotate_σz : rotate 0 0 π = σz := by
-  simp [rotate, σz]
+  simp [rotate, σz, Complex.exp_pi_mul_I]
 
 lemma rotate_xRotate : ∀ θ,
   rotate θ (3 * π / 2) (π / 2) = xRotate θ := by
-  intros
-  simp only [rotate, xRotate]
-  rw [Complex.exp_mul_I]
-  simp
-  ext i j
-  fin_cases i <;> fin_cases j 
-    <;> simp
-  rw [add_mul, Complex.exp_add,
-      Complex.exp_three_pi_div_two,
-      neg_mul, Complex.exp_mul_I]
-  simp
+    have : (3 * π / 2 + π / 2) * Complex.I = 2 * π * Complex.I := by
+      ring
+    simp [rotate, xRotate, this]
 
 lemma rotate_yRotate : ∀ θ,
   rotate θ 0 0 = yRotate θ := by
@@ -120,11 +123,10 @@ lemma phaseShift_2π : phaseShift (2 * π) = 1 := by
 
 @[simp]
 lemma phaseShift_neg_π : phaseShift (-π) = σz := by
-  simp [phaseShift, σz]
+  simp only [phaseShift, σz]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp
-  rw [Complex.exp_neg]
-  field_simp
+  fin_cases i <;> fin_cases j
+    <;> simp [Complex.exp_neg]
 
 @[simp]
 lemma phaseShift_mul_phaseShift : ∀ θ₁ θ₂,
@@ -138,7 +140,7 @@ lemma phaseShift_pow : ∀ (n : ℕ) θ,
     intros n θ
     induction n
     case zero => simp
-    case succ n' ih => 
+    case succ n' ih =>
       simp [pow_succ]
       rw [add_mul, ←phaseShift_mul_phaseShift, ih]
       ring_nf
@@ -205,7 +207,7 @@ lemma controlM_def : ∀ (M : CSquare n),
         right; assumption
       simp [this]
     next h hxy =>
-      simp_all [blockDiagonal]
+      simp_all
       obtain ⟨hx, hy⟩ := hxy
       have : y.divNat = 1 := by
         simp [Fin.divNat]
@@ -227,7 +229,7 @@ lemma controlM_def : ∀ (M : CSquare n),
         rwa [Nat.mod_eq, if_pos (by omega),
              Nat.mod_eq_of_lt]
     next h hxy =>
-      simp_all [blockDiagonal]
+      simp_all
       cases h : decide (x < n) <;> simp_all
       · rename' hxy => hy, h => hx
         have : y.divNat = 0 := by
@@ -295,4 +297,3 @@ lemma notc_decompose : σx ⊗ ∣1⟩⟨1∣ + 1 ⊗ ∣0⟩⟨0∣ = notc := b
 @[simp]
 lemma swap_mul_swap : swap * swap = 1 := by
   solve_matrix [swap, Finset.sum]
-

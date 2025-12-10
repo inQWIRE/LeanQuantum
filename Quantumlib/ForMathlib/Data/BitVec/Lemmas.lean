@@ -1,4 +1,4 @@
-import Quantumlib.Data.BitVec.Basic
+import Quantumlib.ForMathlib.Data.BitVec.Basic
 
 import Mathlib.Data.BitVec
 import Mathlib.Data.Fintype.Basic
@@ -43,7 +43,7 @@ theorem getElem_eq_msb (x : BitVec (w + 1)) : x[w] = x.msb := by
 theorem cons_true_allOnes :
   cons true (allOnes m) = allOnes (m + 1) := by
     ext
-    simp [getElem_cons, getElem_allOnes, Bool.if_true_left]
+    simp [getElem_cons, getElem_allOnes]
 
 @[simp]
 theorem foldl_nil : foldl nil f a = a := by
@@ -91,7 +91,7 @@ theorem weight_and_le (x y : BitVec w) :
       simp [@BitVec.of_length_zero x, @BitVec.of_length_zero y]
     case succ w' ih =>
       rw [←cons_msb_lsbs x, ←cons_msb_lsbs y] 
-      simp only [cons_xor_cons, cons_and_cons]
+      simp only [cons_and_cons]
       cases x.msb <;> cases y.msb
         <;> simp [ih, Nat.le_step, add_comm]
 
@@ -135,7 +135,7 @@ theorem dot_comm (x y : BitVec w) : x.dot y = y.dot x := by
 
 theorem cons_dot_cons (x y : BitVec w) :
   (cons a x).dot (cons b y) = ((a && b).toNat + x.dot y) := by
-    simp [dot, foldl_cons]
+    simp [dot]
 
 @[simp]
 theorem zero_dot : (0#m).dot x = 0 := by

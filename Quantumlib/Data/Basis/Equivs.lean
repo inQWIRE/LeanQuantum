@@ -1,6 +1,4 @@
 import Quantumlib.Data.Basis.Notation
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
 @[simp]

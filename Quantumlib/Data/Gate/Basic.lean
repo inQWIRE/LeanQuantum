@@ -1,7 +1,7 @@
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
-import Quantumlib.Data.Matrix.PowBitVec
-import Quantumlib.Data.Complex.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.Matrix.PowBitVec
+import Quantumlib.ForMathlib.Data.Complex.Basic
 
 open Matrix Kron
 
@@ -9,12 +9,12 @@ noncomputable def hadamard : CSquare 2 :=
   √ 2⁻¹ • !![1,  1;
              1, -1]
 
-noncomputable def hadamardK (k : ℕ) : CSquare (2 ^ k) := 
+noncomputable def hadamardK (k : ℕ) : CSquare (2 ^ k) :=
   hadamard ^ᵥ BitVec.allOnes k
 
 noncomputable def sqrtx : CSquare 2 :=
-  !![⟨1,  1⟩ / 2, ⟨1, -1⟩ / 2;
-     ⟨1, -1⟩ / 2, ⟨1,  1⟩ / 2]
+  !![(1 + Complex.I) / 2, (1 - Complex.I) / 2;
+     (1 - Complex.I) / 2, (1 + Complex.I) / 2]
 
 
 def controlM (M : CSquare n) : CSquare (2 * n) :=
@@ -32,11 +32,11 @@ def controlM (M : CSquare n) : CSquare (2 * n) :=
 
 def cnot : CSquare 4 :=
   !![1, 0, 0, 0;
-     0, 1, 0, 0; 
+     0, 1, 0, 0;
      0, 0, 0, 1;
      0, 0, 1, 0]
 
-def notc : CSquare 4 := 
+def notc : CSquare 4 :=
   !![1, 0, 0, 0;
      0, 0, 0, 1;
      0, 0, 1, 0;
@@ -47,4 +47,3 @@ def swap : CSquare 4 :=
      0, 0, 1, 0;
      0, 1, 0, 0;
      0, 0, 0, 1]
-

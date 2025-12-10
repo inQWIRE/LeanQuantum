@@ -96,7 +96,7 @@ private def getId (P : Pauli n) : String :=
   if s.isEmpty then "0" else s
 
 private def getPhase (P : Pauli n) : String :=
-  match P.m - P.z.dot P.x  with
+  match P.m - (Fin.ofNat 4 <| P.z.dot P.x) with
   | 0 => ""
   | 1 => "-i"
   | 2 => "-"
@@ -121,7 +121,7 @@ unsafe def delabPauli : Delab := do
     let P ← Meta.evalExpr (Pauli n') (←mkAppM `Pauli #[n]) e
     let mut Pid := getId P
     let mut neg := false
-    match P.m - P.z.dot P.x with
+    match P.m - (Fin.ofNat 4 <| P.z.dot P.x) with
     | 0 => Pid := Pid  -- TODO: What's the do-notation NoOp?
     | 1 => 
       neg := true

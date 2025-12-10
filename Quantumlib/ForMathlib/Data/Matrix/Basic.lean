@@ -1,6 +1,6 @@
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Complex.Basic
-import Mathlib.Data.Matrix.Kronecker
+import Mathlib.LinearAlgebra.Matrix.Kronecker
 import Mathlib.LinearAlgebra.UnitaryGroup
 import Mathlib.Logic.Equiv.Fin.Basic
 

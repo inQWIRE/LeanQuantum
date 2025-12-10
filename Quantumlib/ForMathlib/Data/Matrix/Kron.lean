@@ -1,6 +1,6 @@
-import Quantumlib.Data.Matrix.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Basic
 
-import Mathlib.Data.Matrix.Kronecker
+import Mathlib.LinearAlgebra.Matrix.Kronecker
 
 namespace Matrix
 

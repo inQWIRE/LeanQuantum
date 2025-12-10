@@ -1,6 +1,6 @@
 import Quantumlib.Data.Basis.Basic
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.Matrix.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
 import Lean

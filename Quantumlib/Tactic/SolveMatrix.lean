@@ -1,4 +1,4 @@
-import Quantumlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.Matrix.Kron
 
 import Mathlib.Tactic.FinCases
 import Mathlib.Data.Matrix.Basic
@@ -19,6 +19,6 @@ macro_rules
         Fin.divNat,
         Fin.modNat,
         $idents,*];
-      first | fin_cases i <;> fin_cases j <;> simp! <;> done
+      first | fin_cases i <;> fin_cases j <;> simp! <;> try ring_nf <;> done
             | done
     )

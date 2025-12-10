@@ -1,6 +1,6 @@
-import Quantumlib.Data.BitVec.Basic
-import Quantumlib.Data.Complex.Basic
-import Quantumlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.BitVec.Basic
+import Quantumlib.ForMathlib.Data.Complex.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Kron
 
 import Mathlib.Algebra.MonoidAlgebra.Defs
 
@@ -68,12 +68,12 @@ instance : Neg (Pauli n) := ⟨neg⟩
 
 def i : Pauli n → Pauli n := addPhase 3
 
-def phaseFlipCounts (P Q : Pauli n) : ℕ := 
-  2 * P.x.dot Q.z
+def phaseFlipCount (P Q : Pauli n) : Fin 4 := 
+  Fin.ofNat 4 (2 * P.x.dot Q.z)
 
 def mul (P Q : Pauli n) : Pauli n := 
   {
-    m := P.m + Q.m + phaseFlipCounts P Q,
+    m := P.m + Q.m + phaseFlipCount P Q,
     z := P.z ^^^ Q.z,
     x := P.x ^^^ Q.x,
   }
@@ -97,7 +97,7 @@ def evalPhase (P : Pauli n) : ℂ :=
   | 3 => Complex.I
 
 def commutesWith (P Q : Pauli n) : Bool := 
-  (phaseFlipCounts P Q : Fin 4) == phaseFlipCounts Q P
+  (phaseFlipCount P Q : Fin 4) == phaseFlipCount Q P
 
 def toCMatrix (P : Pauli n) : CMatrix (2 ^ n) (2 ^ n) :=
   match n with

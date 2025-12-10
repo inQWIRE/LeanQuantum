@@ -1,6 +1,6 @@
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
-import Quantumlib.Data.Complex.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.Complex.Basic
 
 noncomputable section
 

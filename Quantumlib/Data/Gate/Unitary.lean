@@ -1,11 +1,11 @@
 import Quantumlib.Data.Basic
 import Quantumlib.Data.Gate.ConjTranspose
 import Quantumlib.Data.Gate.Rotate
-import Quantumlib.Data.Matrix.Unitary
+import Quantumlib.ForMathlib.Data.Matrix.Unitary
 
 import Mathlib.LinearAlgebra.UnitaryGroup
 
-open Matrix
+open Matrix hiding swap
 
 open Complex in
 lemma rotate_isUnitary : ∀ θ φ δ, (rotate θ φ δ).IsUnitary := by

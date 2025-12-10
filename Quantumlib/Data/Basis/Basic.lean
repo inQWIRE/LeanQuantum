@@ -1,11 +1,11 @@
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.Matrix.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
+import Mathlib.Analysis.Complex.Exponential
 import Mathlib.Data.Complex.Basic
-import Mathlib.Data.Complex.Exponential
-import Mathlib.Data.Matrix.Kronecker
 import Mathlib.Data.Real.Sqrt
+import Mathlib.LinearAlgebra.Matrix.Kronecker
 
 open Matrix Kron
 

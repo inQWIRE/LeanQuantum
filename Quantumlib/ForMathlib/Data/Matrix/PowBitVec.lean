@@ -1,6 +1,6 @@
-import Quantumlib.Data.BitVec.Lemmas
-import Quantumlib.Data.Matrix.Basic
-import Quantumlib.Data.Matrix.Kron
+import Quantumlib.ForMathlib.Data.BitVec.Lemmas
+import Quantumlib.ForMathlib.Data.Matrix.Basic
+import Quantumlib.ForMathlib.Data.Matrix.Kron
 import Quantumlib.Tactic.Basic
 
 namespace CMatrix
