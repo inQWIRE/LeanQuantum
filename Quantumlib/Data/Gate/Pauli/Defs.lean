@@ -2,6 +2,7 @@ import Quantumlib.ForMathlib.Data.BitVec.Basic
 import Quantumlib.ForMathlib.Data.Complex.Basic
 import Quantumlib.ForMathlib.Data.Matrix.Kron
 import Mathlib.Data.ZMod.Basic
+import Mathlib.Data.Fintype.Basic
 
 import Mathlib.Algebra.MonoidAlgebra.Defs
 
@@ -24,7 +25,7 @@ structure Pauli (n : ℕ) where
   m : ZMod 4 := 0
   z : BitVec n
   x : BitVec n
-deriving DecidableEq, BEq
+deriving DecidableEq, BEq, Fintype
 
 namespace Pauli
 
