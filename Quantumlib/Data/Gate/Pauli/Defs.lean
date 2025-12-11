@@ -5,7 +5,7 @@ import Quantumlib.ForMathlib.Data.Matrix.Kron
 import Mathlib.Algebra.MonoidAlgebra.Defs
 
 def σx : CSquare 2 :=
-  !![0, 1; 
+  !![0, 1;
      1, 0]
 
 def σy : CSquare 2 :=
@@ -17,6 +17,7 @@ def σz : CSquare 2 :=
      0, -1]
 
 /-- P = (-i)ᵐ Zᶻ Xˣ -/
+@[ext]
 structure Pauli (n : ℕ) where
   /-- Phase, (-i)ᵐ -/
   m : Fin 4 := 0
@@ -58,7 +59,9 @@ def zeroed (P : Pauli n) :=
 def weight (P : Pauli n) : ℕ :=
   P.x ||| P.z |>.weight
 
-def one : Pauli n := {z := 0, x := 0}
+def one : Pauli n where
+  z := 0
+  x := 0
 
 instance : One (Pauli n) := ⟨one⟩
 
@@ -68,47 +71,43 @@ instance : Neg (Pauli n) := ⟨neg⟩
 
 def i : Pauli n → Pauli n := addPhase 3
 
-def phaseFlipCount (P Q : Pauli n) : Fin 4 := 
-  Fin.ofNat 4 (2 * P.x.dot Q.z)
+def phaseFlipCount (P Q : Pauli n) : Fin 4 :=
+  if P.x.dotZ₂ Q.z then 2 else 0
 
-def mul (P Q : Pauli n) : Pauli n := 
-  {
-    m := P.m + Q.m + phaseFlipCount P Q,
-    z := P.z ^^^ Q.z,
-    x := P.x ^^^ Q.x,
-  }
+def mul (P Q : Pauli n) : Pauli n where
+  m := P.m + Q.m + phaseFlipCount P Q
+  z := P.z ^^^ Q.z
+  x := P.x ^^^ Q.x
 
 instance : Mul (Pauli n) := ⟨mul⟩
 
-def kron {n m} (P : Pauli n) (Q : Pauli m) : Pauli (n + m) := 
-  {
-    m := P.m + Q.m,
-    z := P.z ++ Q.z,
-    x := P.x ++ Q.x
-  }
+def kron {n m} (P : Pauli n) (Q : Pauli m) : Pauli (n + m) where
+  m := P.m + Q.m
+  z := P.z ++ Q.z
+  x := P.x ++ Q.x
 
 scoped[Pauli] infixl:100 " ⊗ " => kron
 
-def evalPhase (P : Pauli n) : ℂ := 
+def evalPhase (P : Pauli n) : ℂ :=
   match P.m with
   | 0 => 1
   | 1 => -Complex.I
   | 2 => -1
   | 3 => Complex.I
 
-def commutesWith (P Q : Pauli n) : Bool := 
+def commutesWith (P Q : Pauli n) : Bool :=
   (phaseFlipCount P Q : Fin 4) == phaseFlipCount Q P
 
 def toCMatrix (P : Pauli n) : CMatrix (2 ^ n) (2 ^ n) :=
   match n with
   | 0      => (-Complex.I) ^ P.m.toNat • 1
-  | n' + 1 => 
+  | n' + 1 =>
     Matrix.reindex (finCongr <| by ring) (finCongr <| by ring)
     <| Matrix.kron (a := 2) (b := 2)
         (bitsToMat (P.z.msb, P.x.msb)) P.tail.toCMatrix
 where
-  bitsToMat p := 
-    if p.1 && p.2 then 
+  bitsToMat p :=
+    if p.1 && p.2 then
       Complex.I • σy
     else if p.1 then
       σz
@@ -124,7 +123,7 @@ namespace PauliMap
 
 noncomputable section
 
-def normalized (Pm : PauliMap n) : PauliMap n := 
+def normalized (Pm : PauliMap n) : PauliMap n :=
   Finsupp.sum Pm f
 where
   f P c := MonoidAlgebra.single P.zeroed (P.evalPhase * c)
@@ -139,4 +138,3 @@ def toCMatrix (pm : PauliMap n) : CMatrix (2 ^ n) (2 ^ n) :=
   pm.sum (fun P c => (c • P.toCMatrix))
 
 end
-

@@ -64,13 +64,13 @@ theorem lsbs_allOnes :
     omega
 
 @[simp]
-theorem weight_zero : 
+theorem weight_zero :
   (0#m).weight = 0 := by
     simp [weight, foldl]
     induction m <;> simp_all
 
 @[simp]
-theorem weight_allOnes : 
+theorem weight_allOnes :
   (allOnes m).weight = m := by
     simp [weight, foldl]
     induction m <;> simp_all [add_comm]
@@ -90,7 +90,7 @@ theorem weight_and_le (x y : BitVec w) :
     case zero =>
       simp [@BitVec.of_length_zero x, @BitVec.of_length_zero y]
     case succ w' ih =>
-      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y] 
+      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y]
       simp only [cons_and_cons]
       cases x.msb <;> cases y.msb
         <;> simp [ih, Nat.le_succ_of_le, add_comm]
@@ -101,7 +101,7 @@ theorem weight_or (x y : BitVec w) :
     case zero =>
       simp [@BitVec.of_length_zero x, @BitVec.of_length_zero y]
     case succ w' ih =>
-      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y] 
+      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y]
       simp only [cons_and_cons, cons_or_cons, weight_cons, ih]
       cases x.msb <;> cases y.msb
         <;> simp only [
@@ -130,7 +130,7 @@ theorem and_xor_distrib_right (x y z : BitVec w) :
     ext
     simp [Bool.and_xor_distrib_right]
 
-theorem dot_comm (x y : BitVec w) : x.dot y = y.dot x := by 
+theorem dot_comm (x y : BitVec w) : x.dot y = y.dot x := by
   simp [dot, and_comm]
 
 theorem cons_dot_cons (x y : BitVec w) :
@@ -146,7 +146,43 @@ theorem dot_zero : (x : BitVec m).dot (0#m) = 0 := by
   simp [dot]
 
 @[simp]
-theorem dot_allOnes : (x : BitVec m).dot (allOnes m) = x.weight := by 
+theorem dot_allOnes : (x : BitVec m).dot (allOnes m) = x.weight := by
   simp [dot]
+
+
+theorem dotZ₂_eq_odd_weight (x y : BitVec w) : x.dotZ₂ y = ((x.dot y) % 2 == 1) := by rfl
+
+@[simp]
+theorem cons_dotZ₂_cons (x y : BitVec w) :
+  (cons a x).dotZ₂ (cons b y) = ((a && b) ^^ x.dotZ₂ y) := by
+    simp only [dotZ₂, dot]
+    cases a <;> cases b
+      <;> simp [add_comm, ←bne.eq_1, Nat.succ_mod_two_eq_one_iff]
+
+@[simp]
+theorem zero_dotZ₂ : (0#m).dotZ₂ x = false := by
+  simp [dotZ₂, dot]
+
+@[simp]
+theorem dotZ₂_zero : (x : BitVec m).dotZ₂ (0#m) = false := by
+  simp [dotZ₂, dot]
+
+theorem dotZ₂_comm (x y : BitVec m) : x.dotZ₂ y = y.dotZ₂ x := by
+  simp [dotZ₂, dot_comm]
+
+theorem dotZ₂_xor_distrib_left (x y z : BitVec m) :
+  x.dotZ₂ (y ^^^ z) = (x.dotZ₂ y ^^ x.dotZ₂ z) := by
+    induction m
+    case zero =>
+      simp [x.eq_nil]
+    case succ m' ih =>
+      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y, ←cons_msb_lsbs z]
+      cases x.msb <;> cases y.msb <;> cases z.msb <;>
+        simp [ih]
+
+theorem dotZ₂_xor_distrib_right (x y z : BitVec m) :
+  (x ^^^ y).dotZ₂ z = (x.dotZ₂ z ^^ y.dotZ₂ z) := by
+    rw [dotZ₂_comm, dotZ₂_xor_distrib_left]
+    simp [dotZ₂_comm]
 
 end BitVec
