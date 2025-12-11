@@ -1,6 +1,7 @@
 import Quantumlib.ForMathlib.Data.BitVec.Basic
 import Quantumlib.ForMathlib.Data.Complex.Basic
 import Quantumlib.ForMathlib.Data.Matrix.Kron
+import Mathlib.Data.ZMod.Basic
 
 import Mathlib.Algebra.MonoidAlgebra.Defs
 
@@ -20,7 +21,7 @@ def σz : CSquare 2 :=
 @[ext]
 structure Pauli (n : ℕ) where
   /-- Phase, (-i)ᵐ -/
-  m : Fin 4 := 0
+  m : ZMod 4 := 0
   z : BitVec n
   x : BitVec n
 deriving DecidableEq, BEq
@@ -50,7 +51,7 @@ def cons (z x : Bool) (P : Pauli n) : Pauli (n + 1) :=
 def tail (P : Pauli (n + 1)) : Pauli n :=
   {P with z := P.z.lsbs, x := P.x.lsbs}
 
-def addPhase (a : Fin 4) (P : Pauli n) :=
+def addPhase (a : ZMod 4) (P : Pauli n) :=
   {P with m := P.m + a}
 
 def zeroed (P : Pauli n) :=
@@ -71,11 +72,11 @@ instance : Neg (Pauli n) := ⟨neg⟩
 
 def i : Pauli n → Pauli n := addPhase 3
 
-def phaseFlipCount (P Q : Pauli n) : Fin 4 :=
-  if P.x.dotZ₂ Q.z then 2 else 0
+def phaseFlipsWith (P Q : Pauli n) : Bool :=
+  P.x.dotZ₂ Q.z
 
 def mul (P Q : Pauli n) : Pauli n where
-  m := P.m + Q.m + phaseFlipCount P Q
+  m := P.m + Q.m + bif phaseFlipsWith P Q then 2 else 0
   z := P.z ^^^ Q.z
   x := P.x ^^^ Q.x
 
@@ -96,11 +97,11 @@ def evalPhase (P : Pauli n) : ℂ :=
   | 3 => Complex.I
 
 def commutesWith (P Q : Pauli n) : Bool :=
-  (phaseFlipCount P Q : Fin 4) == phaseFlipCount Q P
+  phaseFlipsWith P Q == phaseFlipsWith Q P
 
 def toCMatrix (P : Pauli n) : CMatrix (2 ^ n) (2 ^ n) :=
   match n with
-  | 0      => (-Complex.I) ^ P.m.toNat • 1
+  | 0      => (-Complex.I) ^ P.m.val • 1
   | n' + 1 =>
     Matrix.reindex (finCongr <| by ring) (finCongr <| by ring)
     <| Matrix.kron (a := 2) (b := 2)

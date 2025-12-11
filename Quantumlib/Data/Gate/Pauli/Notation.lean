@@ -25,7 +25,7 @@ def parse_ident (id : Lean.TSyntax `ident) := do
     let (x, z) ←
       match atom with
       | 'X' => pure (1, 0)
-      | 'Y' => 
+      | 'Y' =>
         phase := phase + 1
         pure (1, 1)
       | 'Z' => pure (0, 1)
@@ -72,7 +72,7 @@ syntax "(" pauli_map ")" : pauli_map
 
 syntax "[PA| " pauli_map " ]" : term
 
-macro_rules 
+macro_rules
   | `( [PA| $p:pauli ] ) =>
       ``( PauliMap.normalized (Finsupp.single [P| $p ] 1) )
   | `( [PA| #( $c:term ) • $p:pauli ] ) =>
@@ -85,9 +85,9 @@ macro_rules
       ``( [PA| $pa] )
 
 
-private def getId (P : Pauli n) : String := 
+private def getId (P : Pauli n) : String :=
   let ys := P.z &&& P.x
-  let s := n.fold (fun i h acc => 
+  let s := n.fold (fun i h acc =>
     (if ys[i] then "Y"
      else if P.z[i] then "Z"
      else if P.x[i] then "X"
@@ -96,7 +96,7 @@ private def getId (P : Pauli n) : String :=
   if s.isEmpty then "0" else s
 
 private def getPhase (P : Pauli n) : String :=
-  match P.m - (Fin.ofNat 4 <| P.z.dot P.x) with
+  match P.m - (P.z.dot P.x : ZMod 4) with
   | 0 => ""
   | 1 => "-i"
   | 2 => "-"
@@ -107,27 +107,27 @@ open Lean Elab PrettyPrinter Delaborator SubExpr Meta
 def formatPauli (P : Pauli n) : Format :=
   Format.bracket "[P| " (.text (getId P ++ getPhase P)) " ]"
 
-instance : Repr (Pauli n) where 
+instance : Repr (Pauli n) where
   reprPrec P _ := formatPauli P
 
 
 @[delab app.Pauli.mk]
 unsafe def delabPauli : Delab := do
-  let e ← getExpr 
+  let e ← getExpr
   let #[n, _, _, _] := e.getAppArgs | failure
   let some n' ← (evalNat n).run
     | failure
-  try 
+  try
     let P ← Meta.evalExpr (Pauli n') (←mkAppM `Pauli #[n]) e
-    let mut Pid := getId P
     let mut neg := false
-    match P.m - (Fin.ofNat 4 <| P.z.dot P.x) with
-    | 0 => Pid := Pid  -- TODO: What's the do-notation NoOp?
-    | 1 => 
+    let mut Pid := getId P
+    match P.m - (P.z.dot P.x : ZMod 4) with
+    | 0 => pure ()
+    | 1 =>
       neg := true
       Pid := "i" ++ Pid
     | 2 => neg := true
-    | 3 => Pid := "i" ++ Pid 
+    | 3 => Pid := "i" ++ Pid
     let Pid' := mkIdent <| Name.mkSimple Pid
     if neg then
       `([P| -$(⟨Pid'⟩) ])

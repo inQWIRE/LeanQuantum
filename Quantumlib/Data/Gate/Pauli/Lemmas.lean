@@ -1,6 +1,6 @@
 import Quantumlib.Data.Gate.Equivs
 import Quantumlib.Data.Gate.Pauli.Defs
-import Quantumlib.ForMathlib.Data.Fin
+import Mathlib.Data.ZMod.Basic
 
 open Kron
 
@@ -54,13 +54,14 @@ theorem neg_eq {P : Pauli n} : -P = P.addPhase 2 := by rfl
 
 theorem mul_def (P Q : Pauli n) : P * Q =
   {
-    m := P.m + Q.m + phaseFlipCount P Q,
+    m := P.m + Q.m + (phaseFlipsWith P Q).toNat * 2,
     z := P.z ^^^ Q.z,
     x := P.x ^^^ Q.x,
   }
  := by
   conv_lhs =>
     tactic => simp_rw [(· * ·), Mul.mul, Pauli.mul]
+  cases h : phaseFlipsWith P Q <;> simp_all
 
 @[simp]
 theorem mul_x (P Q : Pauli n) : (P * Q).x = P.x ^^^ Q.x := rfl
@@ -69,7 +70,9 @@ theorem mul_x (P Q : Pauli n) : (P * Q).x = P.x ^^^ Q.x := rfl
 theorem mul_z (P Q : Pauli n) : (P * Q).z = P.z ^^^ Q.z := rfl
 
 @[simp]
-theorem mul_m (P Q : Pauli n) : (P * Q).m = P.m + Q.m + phaseFlipCount P Q := rfl
+theorem mul_m (P Q : Pauli n) :
+  (P * Q).m = P.m + Q.m + (phaseFlipsWith P Q).toNat * 2 := by
+    simp [mul_def]
 
 
 theorem cons_msb_tail (P : Pauli (n + 1)) :
@@ -133,20 +136,18 @@ lemma one_x : (1 : Pauli n).x = 0 := by
 lemma one_m : (1 : Pauli n).m = 0 := by
   simp [one_def]
 
-
 @[simp]
-theorem cons_phaseFlipCount_cons (P Q : Pauli n) :
-  phaseFlipCount (cons a b P) (cons c d Q) = (if (b && c) then 2 else 0) + phaseFlipCount P Q := by
-    simp only [phaseFlipCount]
-    split_ifs <;> simp_all
+theorem cons_phaseFlipsWith_cons (P Q : Pauli n) :
+  phaseFlipsWith (cons a b P) (cons c d Q) = ((b && c) ^^ (phaseFlipsWith P Q)) := by
+    simp [phaseFlipsWith]
 
 @[simp]
 theorem cons_mul_cons (P Q : Pauli n) :
   cons a b P * cons c d Q =
-  addPhase (if (b && c) then 2 else 0) (cons (a ^^ c) (b ^^ d) (P * Q)) := by
-    simp only [addPhase, mul_def, cons_m, cons_x, cons_z, cons_phaseFlipCount_cons, Fin.isValue,
-      mk.injEq, BitVec.cons_xor_cons, true_and]
-    split_ifs <;> simp [add_assoc, add_left_comm, add_comm]
+  addPhase ((b && c).toNat * 2) (cons (a ^^ c) (b ^^ d) (P * Q)) := by
+    simp [addPhase, mul_def]
+    cases P.phaseFlipsWith Q <;> cases b <;> cases c
+       <;> simp_all [add_assoc, show (2 : ZMod 4) + 2 = 0 by rfl]
 
 section addPhase
 
@@ -177,18 +178,22 @@ theorem addPhase_addPhase (P : Pauli n) {l m} : addPhase l (addPhase m P) = addP
 
 @[simp]
 theorem addPhase_mul (P : Pauli n) {m} : addPhase m P * Q = addPhase m (P * Q) := by
-  simp only [addPhase, mul_def, phaseFlipCount, Fin.isValue, mk.injEq, and_self, and_true]
-  omega
+  simp only [addPhase, mul_def, phaseFlipsWith, mk.injEq, and_self, and_true]
+  ring
 
 @[simp]
 theorem mul_addPhase (P : Pauli n) {m} : P * addPhase m Q = addPhase m (P * Q) := by
-  simp only [addPhase, mul_def, phaseFlipCount, Fin.isValue, mk.injEq, and_self, and_true]
-  omega
-
+  simp only [addPhase, mul_def, phaseFlipsWith, mk.injEq, and_self, and_true]
+  ring
 
 @[simp]
 theorem addPhase_zero (P : Pauli n) : addPhase 0 P = P := by
   simp [addPhase]
+
+@[simp]
+theorem addPhase_four :
+  addPhase 4 P = P := by
+    simp [addPhase, show (4 : ZMod 4) = 0 by rfl]
 
 @[simp]
 theorem addPhase_lit {m} {x z : BitVec n} :
@@ -219,7 +224,8 @@ theorem neg_m (P : Pauli n) :
 theorem neg_cons (P : Pauli n) : -(cons a b P) = cons a b (-P) := by
   simp
 
-instance : InvolutiveNeg (Pauli n) := ⟨by simp⟩
+instance : InvolutiveNeg (Pauli n) :=
+  ⟨by simp [show (2 : ZMod 4) + 2 = 0 by rfl]⟩
 instance : HasDistribNeg (Pauli n) := ⟨by simp, by simp⟩
 
 end neg
@@ -248,26 +254,21 @@ theorem zeroed_eq_self_iff (P : Pauli n) : P.zeroed = P ↔ P.m = 0 := by
 @[simp]
 theorem addPhase_three_eq_zeroed_iff (P : Pauli n) :
   P.addPhase 3 = P.zeroed ↔ P.m = 1 := by
-    simp only [zeroed]
-    rw [mk.injEq]
-    simp_all only [addPhase_m, addPhase_x, addPhase_z, and_self, and_true]
-    constructor <;> intros <;> omega
+    simp only [zeroed, addPhase, mk.injEq, and_true]
+    rw [show (3 : ZMod 4) = -1 by rfl, add_eq_zero_iff_eq_neg, neg_neg]
 
 @[simp]
 theorem addPhase_two_eq_zeroed_iff (P : Pauli n) :
   P.addPhase 2 = P.zeroed ↔ P.m = 2 := by
-    simp only [zeroed]
-    rw [mk.injEq]
-    simp_all only [addPhase_m, addPhase_x, addPhase_z, and_self, and_true]
-    constructor <;> intros <;> omega
+    simp only [zeroed, addPhase, mk.injEq, and_true]
+    rw (occs := .pos [1]) [show (2 : ZMod 4) = -2 by rfl]
+    rw [add_eq_zero_iff_eq_neg, neg_neg]
 
 @[simp]
 theorem addPhase_one_eq_zeroed_iff (P : Pauli n) :
   P.addPhase 1 = P.zeroed ↔ P.m = 3 := by
-    simp only [zeroed]
-    rw [mk.injEq]
-    simp_all only [addPhase_m, addPhase_x, addPhase_z, and_self, and_true]
-    constructor <;> intros <;> omega
+  simp only [zeroed, addPhase, mk.injEq, and_true]
+  rw [show (1 : ZMod 4) = -3 by rfl, add_eq_zero_iff_eq_neg, neg_neg]
 
 end zeroed
 
@@ -279,48 +280,50 @@ instance : CancelMonoid (Pauli n) where
       let ⟨m₁, P'⟩ := of_length_zero P
       let ⟨m₂, Q'⟩ := of_length_zero Q
       let ⟨m₃, R'⟩ := of_length_zero R
-      simp_all [mul_def, phaseFlipCount, add_assoc]
+      simp_all [mul_def, phaseFlipsWith, add_assoc]
 
     | succ n' ih =>
       rw [cons_msb_tail P, cons_msb_tail Q, cons_msb_tail R]
-      simp only [cons_mul_cons, Bool.and_eq_true, Fin.isValue, addPhase_cons, bne_iff_ne, ne_eq,
-        Bool.bne_assoc, addPhase_mul, addPhase_addPhase, mul_addPhase,
-        ih]
+      simp only [cons_mul_cons, addPhase_cons, Bool.bne_assoc, addPhase_mul, ih, addPhase_addPhase,
+        mul_addPhase]
+      congr 2
       cases Q.x.msb
         <;> cases Q.z.msb
         <;> cases R.z.msb
         <;> cases P.x.msb
-        <;> simp
+        <;> simp [show (2 : ZMod 4) + 2 = 0 by rfl]
+
   mul_one := by
     intros P
-    simp [mul_def, one_def, phaseFlipCount]
+    simp [mul_def, one_def, phaseFlipsWith]
   one_mul := by
     intros P
-    simp [mul_def, one_def, phaseFlipCount]
+    simp [mul_def, one_def, phaseFlipsWith]
   mul_left_cancel := by
-    intros P Q R
-    simp only [mul_def, phaseFlipCount, Fin.isValue, mk.injEq, BitVec.xor_right_inj, and_imp]
-    intros h hz hx
-    rw [hz] at h
-    simp only [Fin.isValue, add_left_inj, add_right_inj] at h
-    rw [mk.injEq]
-    simp_all
+    intros P Q R h
+    simp [mul_def, mk.injEq, phaseFlipsWith] at h
+    obtain ⟨hm, hz, hx⟩ := h
+    simp only [hz] at hm
+    ext
+    all_goals simp_all
   mul_right_cancel := by
-    intros P Q R
-    simp only [mul_def, phaseFlipCount, Fin.isValue, mk.injEq, BitVec.xor_left_inj, and_imp]
-    intros h hz hx
-    rw [hx] at h
-    simp only [Fin.isValue, add_left_inj] at h
-    rw [mk.injEq]
-    simp_all
+    intros P Q R h
+    simp [mul_def, mk.injEq, phaseFlipsWith] at h
+    obtain ⟨hm, hz, hx⟩ := h
+    simp only [hx] at hm
+    ext
+    all_goals simp_all
 
 instance : Group (Pauli n) where
-  inv P := P.addPhase ((2 * P.m + P.phaseFlipCount P))
+  inv P := P.addPhase (2 * (P.m + (phaseFlipsWith P P).toNat))
   inv_mul_cancel := by
-    intros
-    simp only [addPhase, Fin.isValue, phaseFlipCount, mul_def, BitVec.xor_self, one_def,
+    intro P
+    simp only [addPhase, phaseFlipsWith, mul_def, BitVec.xor_self, one_def,
       BitVec.ofNat_eq_ofNat, mk.injEq, and_self, and_true]
-    split_ifs <;> omega
+    cases phaseFlipsWith P P <;> {
+      ring_nf
+      simp [show (4 : ZMod 4) = 0 by rfl]
+    }
 
 @[simp]
 theorem inv_z (P : Pauli n) : P⁻¹.z = P.z := by
@@ -331,23 +334,23 @@ theorem inv_x (P : Pauli n) : P⁻¹.x = P.x := by
   simp [(·⁻¹)]
 
 @[simp]
-theorem inv_m (P : Pauli n) : P⁻¹.m = -(P.m + P.phaseFlipCount P) := by
-  simp only [(·⁻¹), phaseFlipCount, addPhase]
+theorem inv_m (P : Pauli n) : P⁻¹.m = -(P.m + (phaseFlipsWith P P).toNat * 2) := by
+  simp only [(·⁻¹), phaseFlipsWith, addPhase]
   grind
 
 theorem mul_inv (P Q : Pauli n) :
-  P * Q⁻¹ = (P * Q).addPhase (2 * Q.m + Q.phaseFlipCount Q) := by
-    simp only [mul_def, inv_m, phaseFlipCount, Fin.isValue, neg_add_rev, Fin.add_neg, inv_z, inv_x,
+  P * Q⁻¹ = (P * Q).addPhase (2 * Q.m + (phaseFlipsWith Q Q).toNat * 2) := by
+    simp only [mul_def, inv_m, phaseFlipsWith, neg_add_rev, inv_z, inv_x,
       addPhase_lit, mk.injEq, and_self, and_true]
     grind
 
 theorem inv_mul (P Q : Pauli n) :
-  P⁻¹ * Q = (P * Q).addPhase (2 * P.m + P.phaseFlipCount P) := by
-    simp only [mul_def, inv_m, phaseFlipCount, Fin.isValue, neg_add_rev, Fin.add_neg, inv_z, inv_x,
+  P⁻¹ * Q = (P * Q).addPhase (2 * P.m + (phaseFlipsWith P P).toNat * 2) := by
+    simp only [mul_def, inv_m, phaseFlipsWith, neg_add_rev, inv_z, inv_x,
       addPhase_lit, mk.injEq, and_self, and_true]
     grind
 
-theorem commutesWith_comm (P Q : Pauli n) : P.commutesWith Q ↔ Q.commutesWith P := by
+theorem commutesWith_comm (P Q : Pauli n) : P.commutesWith Q = Q.commutesWith P := by
   simp [commutesWith, Bool.beq_comm]
 
 lemma commute_of_commutesWith (P Q : Pauli n) : P.commutesWith Q → Commute P Q := by
@@ -358,31 +361,55 @@ lemma commute_of_commutesWith (P Q : Pauli n) : P.commutesWith Q → Commute P Q
 lemma commutesWith_of_commute (P Q : Pauli n) : Commute P Q → P.commutesWith Q := by
   intros h
   rw [commute_iff_eq] at h
-  unfold commutesWith
-  simp_all [mul_def, add_comm]
+  simp_all [commutesWith, mul_def, BitVec.xor_comm, add_comm]
+  cases hpq : P.phaseFlipsWith Q
+    <;> cases hqp : Q.phaseFlipsWith P
+    <;> simp_all +decide
+
 
 theorem commutesWith_iff (P Q : Pauli n) : P.commutesWith Q ↔ Commute P Q :=
   ⟨commute_of_commutesWith P Q, commutesWith_of_commute P Q⟩
 
-
 theorem mul_anticomm_of_not_commutesWith (P Q : Pauli n) :
   ¬P.commutesWith Q → P * Q = -(Q * P) := by
     intros h
-    simp only [commutesWith] at h
-    simp_all only [phaseFlipCount, Fin.isValue, beq_iff_eq, mul_def, neg_eq, addPhase, mk.injEq]
-    grind
+    simp only [commutesWith, beq_iff_eq] at h
+    simp only [mul_def]
+    cases hpq : P.phaseFlipsWith Q
+      <;> ring_nf
+      <;> simp_all [BitVec.xor_comm, add_assoc,
+                    show (2 : ZMod 4) + 2 = 0 by rfl]
 
 @[simp]
 theorem commutesWith_one (P : Pauli n) : P.commutesWith 1 := by
-  simp [commutesWith, phaseFlipCount]
+  simp [commutesWith, one_def, phaseFlipsWith]
+
 
 @[simp]
 theorem one_commutesWith (P : Pauli n) : (1 : Pauli n).commutesWith P := by
-  simp [commutesWith, phaseFlipCount]
+  simp [commutesWith_comm]
+
+theorem conj_action (P Q : Pauli n) :
+  P * Q * P⁻¹ = bif P.commutesWith Q then Q else -Q := by
+    by_cases h : P.commutesWith Q
+    · simp only [h, cond_true]
+      rw [commutesWith_iff] at h
+      simp [h.eq, mul_assoc]
+    · simp only [h, cond_false]
+      rw [mul_anticomm_of_not_commutesWith _ _ h]
+      simp [mul_assoc]
+
+@[simp]
+theorem phaseFlipsWith_one (P : Pauli n) : ¬phaseFlipsWith P 1 := by
+  simp [phaseFlipsWith]
+
+@[simp]
+theorem one_phaseFlipsWith (P : Pauli n) : ¬phaseFlipsWith 1 P := by
+  simp [phaseFlipsWith]
 
 theorem pow_two (P : Pauli n) :
-  P ^ 2 = (1 : Pauli n).addPhase (2 * P.m + P.phaseFlipCount P) := by
-    simp only [_root_.pow_two, mul_def, BitVec.xor_self, addPhase, one_m, Fin.isValue, zero_add,
+  P ^ 2 = (1 : Pauli n).addPhase (2 * P.m + (phaseFlipsWith P P).toNat * 2) := by
+    simp only [_root_.pow_two, mul_def, BitVec.xor_self, addPhase, one_m, zero_add,
       one_z, BitVec.ofNat_eq_ofNat, one_x, mk.injEq, add_left_inj, and_self, and_true]
     grind
 
@@ -393,19 +420,25 @@ lemma toCMatrix_cons {n} a b (P : Pauli n) : (cons a b P).toCMatrix =
           simp [toCMatrix]
 
 @[simp]
-theorem toCMatrix_neg (P : Pauli n) :
-  (-P).toCMatrix = -P.toCMatrix := by
+theorem addPhase_toCMatrix (P : Pauli n) (m : ZMod 4) :
+  (P.addPhase m).toCMatrix = ((-Complex.I) ^ m.val) • P.toCMatrix := by
     induction n with
     | zero =>
-      obtain ⟨_, h⟩ := of_length_zero P
-      simp [h, toCMatrix, Fin.val_add,
-            ←Complex.neg_I_pow_eq_pow_mod, pow_add]
+      obtain ⟨m', h⟩ := of_length_zero P
+      subst_vars
+      simp_all [toCMatrix, smul_smul, ←pow_add, ZMod.val_add,
+                Complex.neg_I_pow_eq_pow_mod, add_comm]
     | succ n' ih =>
-      conv_lhs =>
-        rw [cons_msb_tail P]
-        simp only [toCMatrix, cons_tail]
-      simp [-neg_eq, ih, Matrix.submatrix_neg, toCMatrix]
+      rw [cons_msb_tail P]
+      simp only [addPhase_cons, toCMatrix_cons, ih]
+      rw [Matrix.kron_smul]
+      ext i j
+      simp [Matrix.reindex_apply]
 
+@[simp 10000]
+theorem toCMatrix_neg (P : Pauli n) :
+  (-P).toCMatrix = -P.toCMatrix := by
+    simp [ZMod.val_two_eq_two_mod]
 
 lemma toCMatrix_bitsToMat_mul :
   toCMatrix.bitsToMat (a, b) * toCMatrix.bitsToMat (c, d)
@@ -422,8 +455,8 @@ theorem mul_toCMatrix_eq_toCMatrix_mul_toCMatrix (P Q : Pauli n) :
       let ⟨x, hP⟩ := of_length_zero P
       let ⟨y, hQ⟩ := of_length_zero Q
       subst_vars
-      simp [toCMatrix, mul_def, smul_smul, ←pow_add, Fin.val_add,
-            ←Complex.neg_I_pow_eq_pow_mod, add_comm, phaseFlipCount]
+      simp [toCMatrix, mul_def, smul_smul, ←pow_add, ZMod.val_add,
+            ←Complex.neg_I_pow_eq_pow_mod, add_comm, phaseFlipsWith]
     | succ n' ih =>
       conv_rhs =>
         rw [
@@ -439,15 +472,16 @@ theorem mul_toCMatrix_eq_toCMatrix_mul_toCMatrix (P Q : Pauli n) :
           cons_mul_cons
         ]
       rw [toCMatrix_bitsToMat_mul]
-      simp_all only [Fin.isValue, addPhase_cons, Bool.and_eq_true, Bool.bne_true, Bool.true_bne]
+      simp_all only [addPhase_cons, Bool.and_eq_true, Bool.bne_true, Bool.true_bne]
       split_ifs
       next
         h =>
         simp_all only [Bool.bne_true, Bool.true_bne,
-                       Fin.isValue, Matrix.neg_kron]
+                       Matrix.neg_kron]
         simp [←neg_eq, toCMatrix_cons, ←ih]
       next h =>
-        simp_all [toCMatrix_cons, ←ih]
+        cases h' : P.x.msb <;>
+          simp_all [toCMatrix_cons, ←ih]
 
 
 @[simp]
@@ -464,7 +498,7 @@ lemma X_toCMatrix : X.toCMatrix = σx := by
 
 @[simp]
 lemma Y_toCMatrix : Y.toCMatrix = σy := by
-  simp [Y, toCMatrix, toCMatrix.bitsToMat, smul_smul]
+  simp +decide [Y, toCMatrix, toCMatrix.bitsToMat, smul_smul, @ZMod.val_one 4]
 
 @[simp]
 lemma iY_toCMatrix : iY.toCMatrix = Complex.I • σy := by
@@ -475,14 +509,14 @@ lemma Z_toCMatrix : Z.toCMatrix = σz := by
   simp [Z, toCMatrix, toCMatrix.bitsToMat]
 
 @[simps]
-def equivProd (n : ℕ) : Pauli n ≃ Fin 4 × BitVec n × BitVec n where
+def equivProd (n : ℕ) : Pauli n ≃ ZMod 4 × BitVec n × BitVec n where
   toFun P := ⟨P.m, P.z, P.x⟩
   invFun p := ⟨p.1, p.2.1, p.2.2⟩
   left_inv := by rintro ⟨m, z, x⟩; rfl
   right_inv := by rintro ⟨m, z, x⟩; rfl
 
 instance : Fintype (Pauli n) :=
-  Fintype.ofEquiv (Fin 4 × BitVec n × BitVec n) (equivProd n).symm
+  Fintype.ofEquiv (ZMod 4 × BitVec n × BitVec n) (equivProd n).symm
 
 @[simp]
 lemma X_pow_2 : X ^ 2 = 1 := rfl
