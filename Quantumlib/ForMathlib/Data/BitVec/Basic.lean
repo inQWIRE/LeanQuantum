@@ -1,5 +1,6 @@
 import Init.Prelude
 import Mathlib.Data.Fintype.Basic
+import Mathlib.Data.BitVec
 
 namespace BitVec
 
