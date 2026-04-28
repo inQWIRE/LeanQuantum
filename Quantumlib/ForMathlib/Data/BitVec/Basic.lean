@@ -1,4 +1,5 @@
-import Mathlib
+import Init.Prelude
+import Mathlib.Data.Fintype.Basic
 
 namespace BitVec
 
