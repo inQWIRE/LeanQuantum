@@ -102,7 +102,7 @@ def commutesWith (P Q : Pauli n) : Bool :=
 
 def toCMatrix (P : Pauli n) : CMatrix (2 ^ n) (2 ^ n) :=
   match n with
-  | 0      => (-Complex.I) ^ P.m.val • 1
+  | 0      => evalPhase P • 1
   | n' + 1 =>
     Matrix.reindex (finCongr <| by ring) (finCongr <| by ring)
     <| Matrix.kron (a := 2) (b := 2)
