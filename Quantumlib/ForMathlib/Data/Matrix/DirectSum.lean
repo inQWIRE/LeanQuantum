@@ -214,3 +214,19 @@ by
 
 -- lemma dsum_det_C3 (A : CMatrix n1 n1) (B : CMatrix n2 n2): Matrix.det (A ⊕₂ B) = Matrix.det A * Matrix.det B :=
 --   by sorry
+
+-- CMatrix form
+
+def directSumF [Zero α] (A : FMatrix n1 m1 α) (B : FMatrix n2 m2 α) :=
+  (directSum A B).reindex finSumFinEquiv finSumFinEquiv
+
+lemma directSumF_def [Zero α] (A : FMatrix n1 m1 α) (B : FMatrix n2 m2 α) :
+  directSumF A B = fun i j =>
+    if hij : i < n1 ∧ j < m1 then
+      A ⟨i, by linarith⟩ ⟨j, by linarith⟩
+    else if hij' : n1 ≤ i ∧ m1 ≤ j then
+      B ⟨i - n1, by linarith⟩ ⟨j - n2, by linarith⟩
+    else 0 := by sorry
+
+def directSumC (A : CMatrix m1 n1) (B : CMatrix m2 n2) : CMatrix (m1 + m2) (n1 + n2) :=
+   of fun x y => if x < m1 && y < n1 then A x y else if x >= m1 && y >= n1 then B (x - m1) (y - n1) else 0
