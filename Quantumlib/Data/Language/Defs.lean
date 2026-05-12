@@ -28,6 +28,19 @@ end BitVec
 
 def NoDupVector (A : Type) (n : ℕ) := { v : Vector A n // v.toList.Nodup}
 
+namespace NoDupVector
+
+def image (f : A -> B) (Hf : f.Injective) {n} (v : NoDupVector A n) :
+  NoDupVector B n := ⟨v.val.map f, by {
+    rw [Vector.toList_map]
+    rw [List.nodup_map_iff Hf]
+    apply v.property
+  }⟩
+
+def map (f : A ↪ B) {n} (v : NoDupVector A n) : NoDupVector B n :=
+  image f f.injective v
+
+end NoDupVector
 
 
 def gen_pad_matrix {n m n' m'} (vn : Vector (Fin n') n)
@@ -52,6 +65,16 @@ def semantics {U : ℕ -> Type u} [Zero R]
   match G with
   | .embedGate u bits => pad_matrix bits (SU _ u)
 
+def whiskerL {U : ℕ -> Type u} (m : ℕ) {n} (G : EmbeddedGate U n) : EmbeddedGate U (m + n) :=
+  match G with
+  | .embedGate u bits =>
+    .embedGate u (bits.image (Fin.natAdd m) (Fin.natAdd_injective n m))
+
+def whiskerR {U : ℕ -> Type u} (m : ℕ) {n} (G : EmbeddedGate U n) : EmbeddedGate U (n + m) :=
+  match G with
+  | .embedGate u bits =>
+    .embedGate u (bits.image (Fin.castAdd m) (Fin.castAdd_injective n m))
+
 end EmbeddedGate
 
 def Circuit (U : ℕ -> Type u) (n : ℕ) := List (EmbeddedGate U n)
@@ -61,6 +84,16 @@ namespace Circuit
 instance : OfNat (Circuit U n) 1 := ⟨[]⟩
 
 instance : Mul (Circuit U n) := ⟨List.append⟩
+
+
+def whiskerL {U : ℕ -> Type u} (m : ℕ) {n} (G : Circuit U n) : Circuit U (m + n) :=
+  G.map (.whiskerL m)
+
+def whiskerR {U : ℕ -> Type u} (m : ℕ) {n} (G : Circuit U n) : Circuit U (n + m) :=
+  G.map (.whiskerR m)
+
+def stack {U : ℕ -> Type u} {n m} (G : Circuit U n) (H : Circuit U m) : Circuit U (n + m) :=
+  G.whiskerR m * H.whiskerL n
 
 def semantics [One R] [Mul R] [AddCommMonoid R] {U : ℕ -> Type u}
   (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) {n} (C : Circuit U n) :
