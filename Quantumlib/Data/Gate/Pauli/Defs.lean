@@ -59,7 +59,7 @@ def zeroed (P : Pauli n) :=
   {P with m := 0}
 
 def weight (P : Pauli n) : ℕ :=
-  P.x ||| P.z |>.weight
+  (P.x ||| P.z).weight
 
 def one : Pauli n where
   z := 0

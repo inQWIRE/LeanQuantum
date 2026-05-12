@@ -13,11 +13,11 @@ def mkKronChain (terms: List (TSyntax `term)) : MacroM (TSyntax `term) := do
     match terms with
     | [] => Macro.throwError "Empty list of terms"
     | [v] => pure v
-    | v::vs => vs.foldlM (init := v) fun acc v' => 
+    | v::vs => vs.foldlM (init := v) fun acc v' =>
                `(($acc) ⊗ ($v'))
 
 syntax (name := kets) "∣" num "⟩" : term
-@[macro kets] def ketsImpl : Macro 
+@[macro kets] def ketsImpl : Macro
   | `(∣ $n ⟩ ) => do
     let digits := (n.raw.isLit? `num).get!.toList
     let qubits ← (digits.mapM fun d => do
@@ -42,7 +42,7 @@ def ket1Unexpander : Unexpander
   | `($(_)) => `(∣1⟩)
 
 syntax (name := bras) "⟨" num "∣" : term
-@[macro bras] def brasImpl : Macro 
+@[macro bras] def brasImpl : Macro
   | `(⟨ $n ∣) => do
     let digits := (n.raw.isLit? `num).get!.toList
     let qubits ← (digits.mapM fun d => do
@@ -96,4 +96,3 @@ notation "∣R⟩" => ybasisPlus
 notation "∣L⟩" => ybasisMinus
 
 notation "∣Φ+⟩" => EPRpair
-
