@@ -46,17 +46,45 @@ end BitVec
 
 
 
-def gen_pad_matrix {n m n' m'} (vn : Vector (Fin n') n)
-  (vm : Vector (Fin m') m) [Zero R]
+def gen_pad_matrix {n m n' m'} (idxs_n : Vector (Fin n') n)
+  (idxs_m : Vector (Fin m') m) [Zero R]
   (U : Matrix (BitVec n) (BitVec m) R) : Matrix (BitVec n') (BitVec m') R :=
   fun v w =>
-    if v.vectorNotIndexed vn = w.vectorNotIndexed vm then
-      U (v.vectorReindex vn) (w.vectorReindex vm) else 0
+    if v.vectorNotIndexed idxs_n = w.vectorNotIndexed idxs_m then
+      U (v.vectorReindex idxs_n) (w.vectorReindex idxs_m) else 0
 
 def pad_matrix {n m} (v : NoDupVector (Fin n) m) [Zero R]
   (U : Matrix (BitVec m) (BitVec m) R) : Matrix (BitVec n) (BitVec n) R :=
   gen_pad_matrix v.val v.val U
 
+
+def BitVec.addEquiv {n m} : BitVec (n + m) ≃ BitVec n × BitVec m :=
+  ⟨fun v => ⟨v.extractLsb' m n,v.setWidth m⟩, fun v_w => v_w.1 ++ v_w.2, by {
+    intros v
+    simp only
+    ext i Hi
+    simp only [getElem_append, getElem_setWidth, getElem_extractLsb', dite_eq_ite]
+    split_ifs
+    · rfl
+    · congr
+      simp only
+      omega
+  }, by {
+    rintro ⟨v, w⟩
+    simp only [Prod.mk.injEq]
+    rw [extractLsb'_append_eq_left, setWidth_append_eq_right]
+    trivial
+  }⟩
+
+open Kronecker in
+lemma gen_pad_matrix_whiskerL {n m n' m'} (k : ℕ) (vn : Vector (Fin n') n)
+  (vm : Vector (Fin m') m) [Zero R] [Monoid R]
+  (U : Matrix (BitVec n) (BitVec m) R) :
+  gen_pad_matrix (vn.map (Fin.natAdd k)) (vm.map (Fin.natAdd k)) U =
+  ((1 : Matrix (BitVec k) (BitVec k) R) ⊗ₖ
+   gen_pad_matrix vn vm U).reindex BitVec.addEquiv.symm BitVec.addEquiv.symm := by {
+  sorry
+}
 
 
 

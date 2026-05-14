@@ -4,15 +4,15 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 open Real
 
-inductive base_U : nat -> Type where
-  | U_R (θ φ Λ : ℝ) : base_U 1
-  | U_C {n} : base_U n -> base_U (n + 1)
+inductive base_UC : nat -> Type where
+  | U_R (θ φ Λ : ℝ) : base_UC 1
+  | U_C {n} : base_UC n -> base_UC (n + 1)
 
 
 
-def base_ucom := Circuit base_U
+def base_ucom := Circuit base_UC
 
-open base_U
+open base_UC
 
 def I {dim} (n : Fin dim) : base_ucom dim :=
   [EmbeddedGate.embedGate (U_R 0 0 0) ⟨#v[n], List.nodup_singleton _⟩ ]
