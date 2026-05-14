@@ -9,22 +9,6 @@ import Mathlib.Data.BitVec
 import Batteries.Data.BitVec
 import Init.Data.Vector
 
-namespace Vector
-
-def listNotIndexed {n m} (v : Vector (Fin n) m) : List (Fin n) :=
-  (List.finRange n).filter (fun i => (v.contains i).not)
-
-end Vector
-
-namespace BitVec
-
-def vectorReindex {n m} (v : Vector (Fin n) m) (bv : BitVec n) : BitVec m :=
-  BitVec.ofFnLE (fun i => bv.getLsb (v.get i))
-
-def vectorNotIndexed {n m} (v : Vector (Fin n) m) (bv : BitVec n) : List Bool :=
-  v.listNotIndexed.map bv.getLsb
-
-end BitVec
 
 def NoDupVector (A : Type) (n : ℕ) := { v : Vector A n // v.toList.Nodup}
 
@@ -43,6 +27,25 @@ def map (f : A ↪ B) {n} (v : NoDupVector A n) : NoDupVector B n :=
 end NoDupVector
 
 
+namespace Vector
+
+def listNotIndexed {n m} (v : Vector (Fin n) m) : List (Fin n) :=
+  (List.finRange n).filter (fun i => (v.contains i).not)
+
+end Vector
+
+namespace BitVec
+
+def vectorReindex {n m} (v : Vector (Fin n) m) (bv : BitVec n) : BitVec m :=
+  BitVec.ofFnLE (fun i => bv.getLsb (v.get i))
+
+def vectorNotIndexed {n m} (v : Vector (Fin n) m) (bv : BitVec n) : List Bool :=
+  v.listNotIndexed.map bv.getLsb
+
+end BitVec
+
+
+
 def gen_pad_matrix {n m n' m'} (vn : Vector (Fin n') n)
   (vm : Vector (Fin m') m) [Zero R]
   (U : Matrix (BitVec n) (BitVec m) R) : Matrix (BitVec n') (BitVec m') R :=
@@ -53,6 +56,10 @@ def gen_pad_matrix {n m n' m'} (vn : Vector (Fin n') n)
 def pad_matrix {n m} (v : NoDupVector (Fin n) m) [Zero R]
   (U : Matrix (BitVec m) (BitVec m) R) : Matrix (BitVec n) (BitVec n) R :=
   gen_pad_matrix v.val v.val U
+
+
+
+
 
 inductive EmbeddedGate (U : ℕ -> Type u) (n : ℕ) : Type u where
   | embedGate {m} (u : U m) (bits : NoDupVector (Fin n) m) : EmbeddedGate U n
@@ -77,6 +84,9 @@ def whiskerR {U : ℕ -> Type u} (m : ℕ) {n} (G : EmbeddedGate U n) : Embedded
 
 end EmbeddedGate
 
+
+
+
 def Circuit (U : ℕ -> Type u) (n : ℕ) := List (EmbeddedGate U n)
 
 namespace Circuit
@@ -84,7 +94,6 @@ namespace Circuit
 instance : OfNat (Circuit U n) 1 := ⟨[]⟩
 
 instance : Mul (Circuit U n) := ⟨List.append⟩
-
 
 def whiskerL {U : ℕ -> Type u} (m : ℕ) {n} (G : Circuit U n) : Circuit U (m + n) :=
   G.map (.whiskerL m)

@@ -6,7 +6,7 @@ open Real
 
 inductive base_U : nat -> Type where
   | U_R (θ φ Λ : ℝ) : base_U 1
-  | U_CNOT : base_U 2
+  | U_C {n} : base_U n -> base_U (n + 1)
 
 
 
@@ -40,7 +40,7 @@ def Z {dim} (n : Fin dim) : base_ucom dim :=
 -- def P {dim} n : base_ucom dim := Rz (π / 2) n.
 -- def PDAG {dim} n : base_ucom dim := Rz (- (π / 2)) n.
 def CNOT {dim} (m n : Fin dim) (Hmn : m ≠ n := by omega) : base_ucom dim :=
-  [EmbeddedGate.embedGate U_CNOT ⟨#v[m, n], by {
+  [EmbeddedGate.embedGate (U_C (U_R π 0 π)) ⟨#v[m, n], by {
     refine List.nodup_iff_pairwise_ne.mpr ?_
     simp [Hmn]
     }⟩ ]
