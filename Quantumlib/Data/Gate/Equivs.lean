@@ -16,22 +16,9 @@ lemma hadamardK_one : hadamardK 1 = hadamard := by
 @[simp]
 lemma hadamard_mul_hadamard : hadamard * hadamard = 1 := by
   simp only [hadamard]
-  
-  have h_mat : !![(1 : ℂ), 1; 1, -1] * !![1, 1; 1, -1] = !![2, 0; 0, 2] := by
-    solve_matrix
-  have h_scal : (√2⁻¹ : ℝ) * (√2⁻¹) = 1/2 := by
-    rw [←Real.sqrt_mul (by norm_num)]
-    norm_num
-  have h_simp : (1/2 : ℝ) • !![(2 : ℂ), 0; 0, 2] = 1 := by
-    norm_num
-    solve_matrix
-  
-  rw [smul_mul_assoc]
-  erw [Matrix.mul_smul]
-  rw [h_mat]
-  erw [smul_smul]
-  rw [h_scal]
-  exact h_simp
+  rw [smul_mul_smul,
+      show (√2⁻¹ : ℝ) * √2⁻¹ = 1/2 by rw [← Real.sqrt_mul (by norm_num)]; norm_num]
+  solve_matrix
 
 @[simp]
 lemma hadamard_transpose : hadamardᵀ = hadamard := by

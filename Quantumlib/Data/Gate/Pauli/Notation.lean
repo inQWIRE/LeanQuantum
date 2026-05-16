@@ -20,7 +20,7 @@ def parse_ident (id : Lean.TSyntax `ident) : Lean.MacroM (Nat × Nat × Nat × N
   let mut phase := 0
   if atoms.startsWith "i" then
     phase := 3
-    atoms := ( atoms.drop 1 ).toString
+    atoms := atoms.drop 1 |>.toString
   for atom in atoms.toList.reverse do
     let (x, z) ←
       match atom with

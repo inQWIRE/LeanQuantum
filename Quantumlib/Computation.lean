@@ -30,7 +30,7 @@ lemma EPRpair_create :
     ext i j
     simp_rw [Matrix.mul_apply]
     simp [Finset.sum, Fin.modNat, Fin.divNat]
-    fin_cases i <;> simp ; rfl
+    fin_cases i <;> (simp; rfl)
 
 @[simp]
 lemma q_mul_bra0_mul_σx : ∀ (q : CVector 2), (q * ⟨0∣) * σx = q * ⟨1∣ := by

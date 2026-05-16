@@ -53,8 +53,7 @@ theorem powBitVec_mul_powBitVec (A B : CMatrix n n) {m} (x : BitVec m) :
     induction m
     case zero =>
       rw [BitVec.eq_nil x, BitVec.nil]
-      simp
-      apply Matrix.mul_one
+      simp only [powBitVec, Matrix.one_mul]
 
     case succ m' ih =>
       simp_rw [powBitVec, ←ih]

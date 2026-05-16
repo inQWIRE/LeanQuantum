@@ -531,17 +531,17 @@ namespace PauliMap
 
 @[simp]
 theorem normalized.f_zero (P : Pauli n) : normalized.f P 0 = 0 := by
-  simp [f]
+  simp only [normalized.f, mul_zero, Finsupp.single_zero]
   rfl
 
 @[simp]
 theorem normalized_neg : normalized (-Pm) = -normalized Pm := by
   simp only [normalized]
-  erw [Finsupp.sum_neg_index (by simp)]
-  simp only [← Finsupp.sum_neg]
+  have neg_idx : (-Pm).sum normalized.f = Pm.sum fun a b => normalized.f a (-b) :=
+    Finsupp.sum_neg_index (fun a => normalized.f_zero a)
+  rw [neg_idx, ← Finsupp.sum_neg]
   congr; ext
-  unfold normalized.f
-  simp only [mul_neg, Finsupp.single_neg, Finsupp.coe_neg, Pi.neg_apply]
+  simp only [normalized.f, mul_neg, Finsupp.single_neg]
   rfl
 
 @[simp]
@@ -552,22 +552,17 @@ theorem normalized_zero : normalized (0 : PauliMap n) = 0 := by
 theorem normalized_single : normalized (Finsupp.single P a) =
   Finsupp.single P.zeroed (P.evalPhase * a) := by
   simp only [normalized]
-  unfold normalized.f
-  rw [Finsupp.sum_single_index]
-  simp
+  rw [Finsupp.sum_single_index (normalized.f_zero P)]
   rfl
 
 @[simp]
 theorem normalized_add {Pm₁ Pm₂ : PauliMap n} :
   normalized (Pm₁ + Pm₂) = normalized Pm₁ + normalized Pm₂ := by
     simp only [normalized]
-    erw [Finsupp.sum_add_index']
-    case h_zero =>
-      simp
-    case h_add =>
-      intro a b1 b2
-      unfold normalized.f
-      simp [mul_add]
+    refine Finsupp.sum_add_index' ?_ ?_
+    · intros; exact normalized.f_zero _
+    · intro a b1 b2
+      simp only [normalized.f, mul_add, Finsupp.single_add]
       rfl
 
 theorem m_eq_0_of_in_normalized_support {Pm : PauliMap n} {P : Pauli n} :
@@ -576,12 +571,15 @@ theorem m_eq_0_of_in_normalized_support {Pm : PauliMap n} {P : Pauli n} :
     rw [Finsupp.mem_support_iff] at h
     induction Pm using Finsupp.induction generalizing P
     case zero =>
-      simp [normalized] at h
-      erw [Finsupp.zero_apply] at h
-      contradiction
+      simp only [normalized, Finsupp.sum_zero_index] at h
+      exact (h rfl).elim
     case single_add P₁ a Pm' h₁ h₂ ih =>
-      erw [normalized_add, normalized_single,
-          Finsupp.add_apply, Finsupp.single_apply] at h
+      have add_eq : normalized (Finsupp.single P₁ a + Pm')
+                  = normalized (Finsupp.single P₁ a) + normalized Pm' :=
+        normalized_add
+      rw [add_eq, normalized_single] at h
+      change (Finsupp.single P₁.zeroed (P₁.evalPhase * a) P + normalized Pm' P) ≠ 0 at h
+      rw [Finsupp.single_apply] at h
       by_cases heq : P₁.zeroed = P
       · rw [if_pos heq] at h
         simp [←heq]

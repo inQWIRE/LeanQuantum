@@ -75,9 +75,9 @@ theorem one_kron_one :
 @[simp]
 theorem kron_one' :
     A ⊗ (1 : CMatrix 1 1) = reindex (finCongr <| Nat.mul_one ..).symm (finCongr <| Nat.mul_one ..).symm A := by
-  simp [kron_def]
+  simp only [kron_def, reindex_apply, finCongr_symm]
   ext i j
-  simp
+  simp only [submatrix_apply, finProdFinEquiv_symm_apply, kroneckerMap_apply, finCongr_apply]
   generalize h : (1 : CMatrix 1 1) (i.divNat, i.modNat).2 (j.divNat, j.modNat).2 = lhs
   have : lhs = 1 := by
     rw [←h,
@@ -100,9 +100,9 @@ theorem kron_one :
 @[simp]
 theorem one'_kron :
     (1 : CMatrix 1 1) ⊗ (A : CMatrix m n) = reindex (finCongr <| Nat.one_mul ..).symm (finCongr <| Nat.one_mul ..).symm A := by
-  simp [kron_def]
+  simp only [kron_def, reindex_apply, finCongr_symm]
   ext i j
-  simp
+  simp only [submatrix_apply, finProdFinEquiv_symm_apply, kroneckerMap_apply, finCongr_apply]
   generalize h : (1 : CMatrix 1 1) (i.divNat, i.modNat).1 (j.divNat, j.modNat).1 = lhs
   have : lhs = 1 := by
     rw [←h,
