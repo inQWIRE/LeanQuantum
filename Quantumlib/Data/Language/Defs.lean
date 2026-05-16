@@ -691,16 +691,31 @@ lemma gen_pad_matrix_compose {n m o n' m' o'} (k : ℕ) (vn : NoDupVector (Fin n
 
 
 
+class MatrixSemantics (U : ℕ -> Type u) (R : outParam Type) where
+  semantics {n} (u : U n) : Matrix (BitVec n) (BitVec n) R
+
+
+open MatrixSemantics
+
+
+
 inductive EmbeddedGate (U : ℕ -> Type u) (n : ℕ) : Type u where
   | embedGate {m} (u : U m) (bits : NoDupVector (Fin n) m) : EmbeddedGate U n
 
 namespace EmbeddedGate
 
-def semantics {U : ℕ -> Type u} [Zero R]
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) {n} (G : EmbeddedGate U n) :
-    Matrix (BitVec n) (BitVec n) R :=
+instance [MatrixSemantics U R] [Zero R] : MatrixSemantics (EmbeddedGate U) R :=
+  ⟨fun G =>
   match G with
-  | .embedGate u bits => pad_matrix bits (SU _ u)
+  | .embedGate u bits => pad_matrix bits (semantics u)
+  ⟩
+
+
+-- def semantics {U : ℕ -> Type u} [Zero R]
+--   (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) {n} (G : EmbeddedGate U n) :
+--     Matrix (BitVec n) (BitVec n) R :=
+--   match G with
+--   | .embedGate u bits => pad_matrix bits (SU _ u)
 
 def whiskerL {U : ℕ -> Type u} (m : ℕ) {n} (G : EmbeddedGate U n) : EmbeddedGate U (m + n) :=
   match G with
@@ -713,19 +728,19 @@ def whiskerR {U : ℕ -> Type u} (m : ℕ) {n} (G : EmbeddedGate U n) : Embedded
     .embedGate u (bits.image (Fin.castAdd m) (Fin.castAdd_injective n m))
 
 open Kronecker in
-lemma semantics_whiskerL {U : ℕ -> Type u} [Semiring R]
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) k {n} (G : EmbeddedGate U n) :
-  semantics SU (G.whiskerL k) =
-  ((1 : Matrix (BitVec k) (BitVec k) R) ⊗ₖ semantics SU G
+lemma semantics_whiskerL {U : ℕ -> Type u} [Semiring R] [MatrixSemantics U R]
+  k {n} (G : EmbeddedGate U n) :
+  semantics (G.whiskerL k) =
+  ((1 : Matrix (BitVec k) (BitVec k) R) ⊗ₖ semantics G
     ).reindex BitVec.addEquiv.symm BitVec.addEquiv.symm := by {
   simp [semantics, whiskerL, pad_matrix, NoDupVector.image, gen_pad_matrix_whiskerL]
 }
 
 open Kronecker in
 lemma semantics_whiskerR {U : ℕ -> Type u} [Semiring R]
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) k {n} (G : EmbeddedGate U n) :
-  semantics SU (G.whiskerR k) =
-  (semantics SU G ⊗ₖ (1 : Matrix (BitVec k) (BitVec k) R)
+  [MatrixSemantics U R] k {n} (G : EmbeddedGate U n) :
+  semantics (G.whiskerR k) =
+  (semantics G ⊗ₖ (1 : Matrix (BitVec k) (BitVec k) R)
     ).reindex BitVec.addEquiv.symm BitVec.addEquiv.symm := by {
   simp [semantics, whiskerR, pad_matrix, NoDupVector.image, gen_pad_matrix_whiskerR]
 }
@@ -735,10 +750,22 @@ end EmbeddedGate
 
 
 
+
+
+
 structure Circuit (U : ℕ -> Type u) (n : ℕ) : Type u where
   toList : List (EmbeddedGate U n)
 
 namespace Circuit
+
+instance [MatrixSemantics U R] [One R] [Mul R] [AddCommMonoid R]
+  : MatrixSemantics (Circuit U) R :=
+  ⟨fun C => (C.toList.map (fun g => semantics g)).prod⟩
+
+lemma semantics_defn [MatrixSemantics U R] [One R] [Mul R] [AddCommMonoid R]
+  {n} (C : Circuit U n) :
+  semantics C = (C.toList.map (fun g => semantics g)).prod := rfl
+
 
 @[simp]
 def toList_mk {U : ℕ → Type u} {n : ℕ} l : (⟨l⟩ : Circuit U n).toList = l := rfl
@@ -765,25 +792,20 @@ def whiskerR {U : ℕ -> Type u} (m : ℕ) {n} (G : Circuit U n) : Circuit U (n 
 def stack {U : ℕ -> Type u} {n m} (G : Circuit U n) (H : Circuit U m) : Circuit U (n + m) :=
   G.whiskerR m * H.whiskerL n
 
-def semantics [One R] [Mul R] [AddCommMonoid R] {U : ℕ -> Type u}
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) {n} (C : Circuit U n) :
-    Matrix (BitVec n) (BitVec n) R :=
-    (C.toList.map (fun g => g.semantics SU)).prod
 
 lemma semantics_mul [Semiring R] {U : ℕ -> Type u}
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) {n} (C D : Circuit U n) :
-  semantics SU (C * D) = semantics SU C * semantics SU D := by {
-  unfold semantics
-  simp
+  [MatrixSemantics U R] {n} (C D : Circuit U n) :
+  semantics (C * D) = semantics (R:=R) C * semantics D := by {
+  simp [semantics_defn]
 }
 
 open Kronecker in
 lemma semantics_whiskerL [CommSemiring R] {U : ℕ -> Type u}
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) k {n} (C : Circuit U n) :
-  semantics SU (C.whiskerL k) =
-  ((1 : Matrix (BitVec k) (BitVec k) R) ⊗ₖ semantics SU C
+  [MatrixSemantics U R] k {n} (C : Circuit U n) :
+  semantics (C.whiskerL k) =
+  ((1 : Matrix (BitVec k) (BitVec k) R) ⊗ₖ semantics C
     ).reindex BitVec.addEquiv.symm BitVec.addEquiv.symm := by {
-  unfold semantics
+  simp only [semantics_defn]
   induction C with
   | mk C =>
     simp only [whiskerL, toList_mk, List.map_map, Matrix.reindex_apply, Equiv.symm_symm]
@@ -799,11 +821,11 @@ lemma semantics_whiskerL [CommSemiring R] {U : ℕ -> Type u}
 
 open Kronecker in
 lemma semantics_whiskerR [CommSemiring R] {U : ℕ -> Type u}
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) k {n} (C : Circuit U n) :
-  semantics SU (C.whiskerR k) =
-  (semantics SU C ⊗ₖ (1 : Matrix (BitVec k) (BitVec k) R)
+  [MatrixSemantics U R] k {n} (C : Circuit U n) :
+  semantics (C.whiskerR k) =
+  (semantics C ⊗ₖ (1 : Matrix (BitVec k) (BitVec k) R)
     ).reindex BitVec.addEquiv.symm BitVec.addEquiv.symm := by {
-  unfold semantics
+  simp only [semantics_defn]
   induction C with
   | mk C =>
     simp only [whiskerR, toList_mk, List.map_map, Matrix.reindex_apply, Equiv.symm_symm]
@@ -819,9 +841,9 @@ lemma semantics_whiskerR [CommSemiring R] {U : ℕ -> Type u}
 
 open Kronecker in
 lemma semantics_stack [CommSemiring R] {U : ℕ -> Type u}
-  (SU : forall n, U n -> Matrix (BitVec n) (BitVec n) R) {n} (C D : Circuit U n) :
-  semantics SU (stack C D) =
-  (semantics SU C ⊗ₖ semantics SU D
+  [MatrixSemantics U R] {n} (C D : Circuit U n) :
+  semantics (stack C D) =
+  (semantics C ⊗ₖ semantics D
     ).reindex BitVec.addEquiv.symm BitVec.addEquiv.symm := by {
   unfold stack
   rw [semantics_mul]
