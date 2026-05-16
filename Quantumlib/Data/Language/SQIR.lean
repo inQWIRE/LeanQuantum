@@ -20,10 +20,6 @@ def I {dim} (n : Fin dim) : base_ucom dim :=
 noncomputable section
 
 -- (* Some useful shorthands. *)
--- def U_H := .
--- def U_X := U_R π 0 π.
--- def U_Y := U_R π (π/2) (π/2).
--- def U_Z := U_R 0 0 π.
 def H {dim} (n : Fin dim) : base_ucom dim :=
   [EmbeddedGate.embedGate (U_R (π/2) 0 π) ⟨#v[n], List.nodup_singleton _⟩ ]
 def X {dim} (n : Fin dim) : base_ucom dim :=
