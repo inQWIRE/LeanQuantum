@@ -347,6 +347,51 @@ def indexedEquiv {n m} (v : NoDupVector (Fin n) m) :
    mk_of_vecNotIndexed_id v,
    id_mk_of_vecNotIndexed v⟩
 
+
+lemma vectorNotIndexed'_eq {n m}
+  (vm : NoDupVector (Fin n) m)
+  (bv bv' : BitVec n) :
+  bv.vectorNotIndexed' vm = bv'.vectorNotIndexed' vm ↔
+  ∀ ⦃i⦄, i ∉ vm.val -> bv[i] = bv'[i] := by {
+  constructor
+  · intros Heq i Hi
+    simp only [vectorNotIndexed'_alt, NoDupVector.indexedEquiv, Equiv.coe_fn_symm_mk, Sum.elim_inr] at Heq
+    rw [← vm.mem_finCompl] at Hi
+    apply Vector.getElem_of_mem at Hi
+    obtain ⟨j, Hj, Hlj⟩ := Hi
+    apply (congrArg (fun v => v[j])) at Heq
+    simp only [Fin.getElem_fin, getElem_ofFnLE] at Heq
+    rw [← Hlj]
+    exact Heq
+  · intros Heq
+    simp only [vectorNotIndexed'_alt, NoDupVector.indexedEquiv, Equiv.coe_fn_symm_mk, Sum.elim_inr]
+    ext i Hi
+    simp only [Fin.getElem_fin, getElem_ofFnLE]
+    apply Heq
+    rw [← vm.mem_finCompl]
+    apply Vector.getElem_mem
+}
+
+lemma vectorNotIndexed'_determines_disjoint {n m o}
+  (vm : NoDupVector (Fin n) m) (vo : NoDupVector (Fin n) o)
+  (bv bv' : BitVec n) :
+  Disjoint ({x | x ∈ vm.val} : Finset (Fin n)) ({x | x ∈ vo.val} : Finset (Fin n)) ->
+  bv.vectorNotIndexed' vm = bv'.vectorNotIndexed' vm ->
+  bv.vectorReindex vo.val = bv'.vectorReindex vo.val := by {
+  intros Hdisj
+  rw [Finset.disjoint_right] at Hdisj
+  simp only [Finset.mem_filter, Finset.mem_univ, true_and] at Hdisj
+  rw [vectorNotIndexed'_eq]
+  intros Hni
+  ext i Hi
+  unfold vectorReindex
+  simp only [Fin.getElem_fin, getLsb_eq_getElem, getElem_ofFnLE]
+  set v := vo.val[i]
+  have Hv : v ∈ vo.val := Vector.getElem_mem Hi
+  apply Hdisj at Hv
+  apply Hni Hv
+}
+
 end BitVec
 
 
@@ -635,15 +680,16 @@ lemma gen_pad_matrix_ill_sized [Zero R] {n m n' m'}
   simp_all
 }
 
+instance {α n} : Coe (NoDupVector α n) (Vector α n) := ⟨Subtype.val⟩
 
-lemma gen_pad_matrix_compose {n m o n' m' o'} (k : ℕ) (vn : NoDupVector (Fin n') n)
+lemma gen_pad_matrix_compose {n m o n' m' o'} (vn : NoDupVector (Fin n') n)
   (vm : NoDupVector (Fin m') m) (vo : NoDupVector (Fin o') o) [Semiring R]
   (U : Matrix (BitVec n) (BitVec m) R)
   (V : Matrix (BitVec m) (BitVec o) R)
   (Hsize : n' - n = m' - m <-> m' - m = o' - o)
   (Hsize' : n' - n = m' - m <-> n' - n = o' - o) :
-  gen_pad_matrix vn.val vo.val (U * V) =
-  gen_pad_matrix vn.val vm.val U * gen_pad_matrix vm.val vo.val V := by {
+  gen_pad_matrix vn vo (U * V) =
+  gen_pad_matrix vn.val vm U * gen_pad_matrix vm.val vo.val V := by {
   ext i j
   rw [Matrix.mul_apply]
   unfold gen_pad_matrix
@@ -688,6 +734,62 @@ lemma gen_pad_matrix_compose {n m o n' m' o'} (k : ℕ) (vn : NoDupVector (Fin n
     intros a
     simp_all
 }
+
+lemma BitVec.toVectorLE_inj {n} {bv bv' : BitVec n} : bv.toVectorLE = bv'.toVectorLE <-> bv = bv' := by {
+  constructor; apply toVectorLE_injective
+  simp_all
+}
+
+
+
+@[simp]
+def List.Nodup_comp {α} : List α -> Prop
+  | [] => True
+  | a :: l => l.Forall (a≠·) /\ l.Nodup_comp
+
+lemma List.Forall_not_eq {α} (a : α) (l : List α) :
+  Forall (a≠·) l ↔ a ∉ l := by {
+  rw [List.forall_iff_forall_mem]
+  grind
+}
+
+lemma List.NoDup_comp_correct {α} (l : List α) : l.Nodup_comp <-> l.Nodup := by {
+  induction l <;> simp_all [Forall_not_eq]
+}
+
+def Vector.toNoDupVector {α n} (v : Vector α n) (Hv : v.toList.Nodup) : NoDupVector α n :=
+  Subtype.mk v Hv
+
+def Vector.toNoDupVector_comp {α n} (v : Vector α n) (Hv : v.toList.Nodup_comp := by simp_all +arith)
+  : NoDupVector α  n := v.toNoDupVector (v.toList.NoDup_comp_correct.mp Hv)
+
+
+
+
+
+
+-- lemma pad_matrix_comm {n m o}
+--   (vm : NoDupVector (Fin n) m) (vo : NoDupVector (Fin n) o) [Semiring R]
+--   (U : Matrix (BitVec m) (BitVec m) R)
+--   (V : Matrix (BitVec o) (BitVec o) R) :
+--   Disjoint ({x | x ∈ vm.val} : Finset (Fin n)) ({x | x ∈ vo.val} : Finset (Fin n)) ->
+--   pad_matrix vm U * pad_matrix vo V =
+--   pad_matrix vo V * pad_matrix vm U := by {
+--   intros Hdisj
+--   ext i j
+--   simp only [Matrix.mul_apply]
+--   unfold pad_matrix gen_pad_matrix
+--   simp only [mul_ite, ite_mul, zero_mul, mul_zero]
+--   simp only [BitVec.vectorNotIndexed_alt']
+--   simp only [Vector.toList_inj, BitVec.toVectorLE_inj]
+--   congr 1
+--   ext k
+--   split <;> rename_i Hk
+--   ·
+--   -- simp only [← ite_and]
+
+
+-- }
 
 
 
@@ -760,12 +862,17 @@ namespace Circuit
 
 instance [MatrixSemantics U R] [One R] [Mul R] [AddCommMonoid R]
   : MatrixSemantics (Circuit U) R :=
-  ⟨fun C => (C.toList.map (fun g => semantics g)).prod⟩
+  ⟨fun C => (C.toList.reverse.map (fun g => semantics g)).prod⟩
 
 lemma semantics_defn [MatrixSemantics U R] [One R] [Mul R] [AddCommMonoid R]
   {n} (C : Circuit U n) :
-  semantics C = (C.toList.map (fun g => semantics g)).prod := rfl
+  semantics C = (C.toList.reverse.map (fun g => semantics g)).prod := rfl
 
+def ofGateOn {U : ℕ -> Type u} {n m} (u : U n) (v : Vector (Fin m) n)
+  (Hv : v.toList.Nodup_comp := by simp_all +arith) : Circuit U m :=
+  ⟨[.embedGate u (v.toNoDupVector_comp Hv)]⟩
+
+-- def seq {U : ℕ → Type u} {n} (C D : Circuit U n) : Circuit
 
 @[simp]
 def toList_mk {U : ℕ → Type u} {n : ℕ} l : (⟨l⟩ : Circuit U n).toList = l := rfl
@@ -795,7 +902,7 @@ def stack {U : ℕ -> Type u} {n m} (G : Circuit U n) (H : Circuit U m) : Circui
 
 lemma semantics_mul [Semiring R] {U : ℕ -> Type u}
   [MatrixSemantics U R] {n} (C D : Circuit U n) :
-  semantics (C * D) = semantics (R:=R) C * semantics D := by {
+  semantics (C * D) = semantics (R:=R) D * semantics C := by {
   simp [semantics_defn]
 }
 
@@ -808,12 +915,13 @@ lemma semantics_whiskerL [CommSemiring R] {U : ℕ -> Type u}
   simp only [semantics_defn]
   induction C with
   | mk C =>
-    simp only [whiskerL, toList_mk, List.map_map, Matrix.reindex_apply, Equiv.symm_symm]
+    simp only [whiskerL, toList_mk, List.map_reverse, List.map_map, Matrix.reindex_apply, Equiv.symm_symm]
     induction C with
     | nil => simp
     | cons G C IHC =>
       simp only [List.map_cons, Function.comp_apply, EmbeddedGate.semantics_whiskerL,
-        Matrix.reindex_apply, Equiv.symm_symm, List.prod_cons, IHC, Matrix.submatrix_mul_equiv]
+        Matrix.reindex_apply, Equiv.symm_symm, List.reverse_cons, List.prod_append, IHC,
+        List.prod_cons, List.prod_nil, mul_one, Matrix.submatrix_mul_equiv]
       rw [← one_mul 1]
       rw [Matrix.mul_kronecker_mul]
       simp only [mul_one]
@@ -828,12 +936,14 @@ lemma semantics_whiskerR [CommSemiring R] {U : ℕ -> Type u}
   simp only [semantics_defn]
   induction C with
   | mk C =>
-    simp only [whiskerR, toList_mk, List.map_map, Matrix.reindex_apply, Equiv.symm_symm]
+    simp only [whiskerR, toList_mk, List.map_reverse, List.map_map, Matrix.reindex_apply,
+      Equiv.symm_symm]
     induction C with
     | nil => simp
     | cons G C IHC =>
       simp only [List.map_cons, Function.comp_apply, EmbeddedGate.semantics_whiskerR,
-        Matrix.reindex_apply, Equiv.symm_symm, List.prod_cons, IHC, Matrix.submatrix_mul_equiv]
+        Matrix.reindex_apply, Equiv.symm_symm, List.reverse_cons, List.prod_append, IHC,
+        List.prod_cons, List.prod_nil, mul_one, Matrix.submatrix_mul_equiv]
       rw [← one_mul 1]
       rw [Matrix.mul_kronecker_mul]
       simp only [mul_one]
