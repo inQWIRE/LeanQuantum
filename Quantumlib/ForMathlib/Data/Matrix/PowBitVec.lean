@@ -14,7 +14,7 @@ def powBitVec (self : CMatrix m m) (x : BitVec n) : CMatrix (m ^ n) (m ^ n) :=
         (finCongr <| by ring)
         (finCongr <| by ring) <|
           (self ^ x.msb.toNat) ⊗
-          (powBitVec self x.lsbs : CMatrix (m ^ n') (m ^ n'))
+          (powBitVec self (x.setWidth n') : CMatrix (m ^ n') (m ^ n'))
 
 infix:80 " ^ᵥ " => powBitVec
 
@@ -28,7 +28,7 @@ theorem powBitVec_zero (M : CMatrix n n) m :
       simp_rw [
         powBitVec,
         BitVec.msb_zero,
-        BitVec.lsbs_zero,
+        BitVec.setWidth_zero,
         ih,
         Bool.toNat_false, pow_zero,
         Matrix.one_kron_one]

@@ -77,7 +77,7 @@ theorem mul_m (P Q : Pauli n) :
 
 theorem cons_msb_tail (P : Pauli (n + 1)) :
   P = cons P.z.msb P.x.msb P.tail  := by
-    simp [cons, tail, BitVec.cons_msb_lsbs]
+    simp [cons, tail, BitVec.cons_msb_setWidth]
 
 
 theorem of_length_zero (P : Pauli 0) : ∃ m, P = {m := m, x := 0, z := 0} := by
@@ -107,12 +107,12 @@ theorem cons_tail (P : Pauli n) a b :
 
 @[simp]
 theorem tail_z (P : Pauli (n + 1)) :
-  P.tail.z = P.z.lsbs := by
+  P.tail.z = P.z.setWidth n := by
     simp [tail]
 
 @[simp]
 theorem tail_x (P : Pauli (n + 1)) :
-  P.tail.x = P.x.lsbs := by
+  P.tail.x = P.x.setWidth n := by
     simp [tail]
 
 @[simp]

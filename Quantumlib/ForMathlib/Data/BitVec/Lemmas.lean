@@ -7,38 +7,6 @@ import Mathlib.Tactic.Ring
 
 namespace BitVec
 
-instance : Fintype (BitVec w) :=
-  Fintype.ofEquiv (Fin (2 ^ w)) equivFin.toEquiv.symm
-
-theorem cons_msb_lsbs (x : BitVec (w + 1)) :
-  cons x.msb x.lsbs = x := by simp [lsbs]
-
-@[simp]
-theorem lsbs_zero :
-  (0#(m + 1)).lsbs = 0#m := by simp [lsbs]
-
-@[simp]
-theorem lsbs_cons (x : BitVec w) b :
-  (BitVec.cons b x).lsbs = x := by simp [lsbs]
-
-@[simp]
-theorem lsbs_xor (x y : BitVec (w + 1)) :
-  (x ^^^ y).lsbs = x.lsbs ^^^ y.lsbs := by
-    simp [lsbs]
-
-@[simp]
-theorem lsbs_or (x y : BitVec (w + 1)) :
-  (x ||| y).lsbs = x.lsbs ||| y.lsbs := by
-    simp [lsbs]
-
-@[simp]
-theorem lsbs_and (x y : BitVec (w + 1)) :
-  (x &&& y).lsbs = x.lsbs &&& y.lsbs := by
-    simp [lsbs]
-
-theorem getElem_eq_msb (x : BitVec (w + 1)) : x[w] = x.msb := by
-  simp [BitVec.msb, ←getLsbD_eq_getElem, BitVec.getLsbD_eq_getMsbD]
-
 @[simp]
 theorem cons_true_allOnes :
   cons true (allOnes m) = allOnes (m + 1) := by
@@ -57,10 +25,10 @@ theorem foldl_cons {x : BitVec w} : foldl (cons b x) f a = f b (foldl x f a) := 
   rw [dif_neg (by omega)]
 
 @[simp]
-theorem lsbs_allOnes :
-  (allOnes (m + 1)).lsbs = allOnes m := by
+theorem setWidth_allOnes :
+  (allOnes (m + 1)).setWidth m = allOnes m := by
     ext
-    simp [lsbs]
+    simp
     omega
 
 @[simp]
@@ -90,10 +58,12 @@ theorem weight_and_le (x y : BitVec w) :
     case zero =>
       simp [@BitVec.of_length_zero x, @BitVec.of_length_zero y]
     case succ w' ih =>
-      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y]
+      rw [←cons_msb_setWidth x, ←cons_msb_setWidth y]
       simp only [cons_and_cons]
       cases x.msb <;> cases y.msb
-        <;> simp [ih, Nat.le_succ_of_le, add_comm]
+        <;> simp only [Bool.and_self, Bool.and_true, Bool.and_false,
+                       weight_cons, Bool.toNat_true, Bool.toNat_false]
+        <;> (have h := ih (x.setWidth w') (y.setWidth w'); omega)
 
 theorem weight_or (x y : BitVec w) :
   (x ||| y).weight = x.weight + y.weight - (x &&& y).weight := by
@@ -101,7 +71,7 @@ theorem weight_or (x y : BitVec w) :
     case zero =>
       simp [@BitVec.of_length_zero x, @BitVec.of_length_zero y]
     case succ w' ih =>
-      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y]
+      rw [←cons_msb_setWidth x, ←cons_msb_setWidth y]
       simp only [cons_and_cons, cons_or_cons, weight_cons, ih]
       cases x.msb <;> cases y.msb
         <;> simp only [
@@ -113,7 +83,7 @@ theorem weight_or (x y : BitVec w) :
       rw [Nat.sub_add_eq, add_comm 2, add_assoc _ 2, add_comm 2, ←add_assoc]
       symm
       calc
-        _ = (x.lsbs.weight + y.lsbs.weight + 1) - (x.lsbs &&& y.lsbs).weight := by
+        _ = ((x.setWidth w').weight + (y.setWidth w').weight + 1) - (x.setWidth w' &&& y.setWidth w').weight := by
           rw [add_assoc, Nat.add_sub_assoc, Nat.add_sub_assoc (k := 1) (by omega)]
           ring_nf
           rw [add_comm]
@@ -176,7 +146,7 @@ theorem dotZ₂_xor_distrib_left (x y z : BitVec m) :
     case zero =>
       simp [x.eq_nil]
     case succ m' ih =>
-      rw [←cons_msb_lsbs x, ←cons_msb_lsbs y, ←cons_msb_lsbs z]
+      rw [←cons_msb_setWidth x, ←cons_msb_setWidth y, ←cons_msb_setWidth z]
       cases x.msb <;> cases y.msb <;> cases z.msb <;>
         simp [ih]
 
