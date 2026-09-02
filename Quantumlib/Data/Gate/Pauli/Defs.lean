@@ -50,7 +50,7 @@ def cons (z x : Bool) (P : Pauli n) : Pauli (n + 1) :=
   {P with z := P.z.cons z, x := P.x.cons x}
 
 def tail (P : Pauli (n + 1)) : Pauli n :=
-  {P with z := P.z.lsbs, x := P.x.lsbs}
+  {P with z := P.z.setWidth n, x := P.x.setWidth n}
 
 def addPhase (a : ZMod 4) (P : Pauli n) :=
   {P with m := P.m + a}
